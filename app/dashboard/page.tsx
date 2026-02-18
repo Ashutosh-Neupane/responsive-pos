@@ -39,7 +39,7 @@ export default function DashboardPage() {
         const salesToday = getSalesToday();
         const totalToday = getTotalSalesToday();
         const lowStock = getLowStockProducts();
-        const outstandingTotal = khata.reduce((sum, k) => sum + Math.max(0, k.total_credit - k.amount_paid), 0);
+        const outstandingTotal = khata.reduce((sum, k) => sum + Math.max(0, k.total_credit - k.total_paid), 0);
 
         setStats({
           todaySales: totalToday,

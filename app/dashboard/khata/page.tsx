@@ -41,9 +41,9 @@ export default function KhataPage() {
     );
   });
 
-  const totalOutstanding = khata.reduce((sum, k) => sum + Math.max(0, k.total_credit - k.amount_paid), 0);
+  const totalOutstanding = khata.reduce((sum, k) => sum + Math.max(0, k.total_credit - k.total_paid), 0);
   const totalCredit = khata.reduce((sum, k) => sum + k.total_credit, 0);
-  const totalPaid = khata.reduce((sum, k) => sum + k.amount_paid, 0);
+  const totalPaid = khata.reduce((sum, k) => sum + k.total_paid, 0);
 
   const getCustomerName = (customerId: string) => {
     return customers.find((c) => c.id === customerId)?.name || 'Unknown';
@@ -168,7 +168,7 @@ export default function KhataPage() {
                       >
                         <option value="">-- Select Customer --</option>
                         {filteredKhata.map((k) => {
-                          const balance = k.total_credit - k.amount_paid;
+                          const balance = k.total_credit - k.total_paid;
                           return (
                             <option key={k.id} value={k.id}>
                               {getCustomerName(k.customer_id)} - Due: Rs {balance}
@@ -240,7 +240,7 @@ export default function KhataPage() {
           ) : (
             <div className="space-y-3">
               {filteredKhata.map((k) => {
-                const balance = k.total_credit - k.amount_paid;
+                const balance = k.total_credit - k.total_paid;
                 const isOverdue = balance > 0;
 
                 return (
@@ -259,7 +259,7 @@ export default function KhataPage() {
 
                         <div className="text-center">
                           <p className="text-sm text-slate-600">Paid Amount</p>
-                          <p className="font-bold text-green-700">Rs {k.amount_paid}</p>
+                          <p className="font-bold text-green-700">Rs {k.total_paid}</p>
                         </div>
 
                         <div className="text-center">

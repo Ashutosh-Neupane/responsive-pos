@@ -60,7 +60,7 @@ export default function ExpensesPage() {
   const filteredExpenses = expenses.filter(
     (e) =>
       e.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      e.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (e.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
   );
 
   const handleReset = () => {
