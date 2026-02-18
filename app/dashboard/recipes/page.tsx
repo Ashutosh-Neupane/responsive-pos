@@ -125,8 +125,12 @@ export default function RecipesPage() {
                   <Input
                     type="number"
                     min="1"
-                    value={yieldQuantity}
-                    onChange={(e) => setYieldQuantity(parseInt(e.target.value) || 1)}
+                    value={yieldQuantity || ''}
+                    onChange={(e) => setYieldQuantity(e.target.value === '' ? 1 : parseInt(e.target.value) || 1)}
+                    onBlur={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (isNaN(val) || val < 1) setYieldQuantity(1);
+                    }}
                     placeholder="How many units does this recipe produce?"
                   />
                 </div>
@@ -160,8 +164,12 @@ export default function RecipesPage() {
                         <Input
                           type="number"
                           step="0.01"
-                          value={ing.quantity}
-                          onChange={(e) => updateIngredient(idx, 'quantity', parseFloat(e.target.value))}
+                          value={ing.quantity || ''}
+                          onChange={(e) => updateIngredient(idx, 'quantity', e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                          onBlur={(e) => {
+                            const val = parseFloat(e.target.value);
+                            if (isNaN(val) || val < 0) updateIngredient(idx, 'quantity', 0);
+                          }}
                           className="h-9 text-sm"
                         />
                       </div>

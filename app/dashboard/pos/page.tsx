@@ -387,8 +387,14 @@ export default function POSPage() {
                         <input
                           type="number"
                           min="0"
-                          value={itemDiscount.value}
-                          onChange={(e) => setItemDiscounts({...itemDiscounts, [item.id]: {...itemDiscount, value: parseFloat(e.target.value) || 0}})}
+                          value={itemDiscount.value || ''}
+                          onChange={(e) => setItemDiscounts({...itemDiscounts, [item.id]: {...itemDiscount, value: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0}})}
+                          onBlur={(e) => {
+                            const val = parseFloat(e.target.value);
+                            if (isNaN(val) || val < 0) {
+                              setItemDiscounts({...itemDiscounts, [item.id]: {...itemDiscount, value: 0}});
+                            }
+                          }}
                           className="text-[10px] border rounded px-1 py-0.5 w-12"
                           placeholder="0"
                         />
@@ -440,8 +446,12 @@ export default function POSPage() {
                       <input
                         type="number"
                         min="0"
-                        value={cartDiscount}
-                        onChange={(e) => setCartDiscount(parseFloat(e.target.value) || 0)}
+                        value={cartDiscount || ''}
+                        onChange={(e) => setCartDiscount(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                        onBlur={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (isNaN(val) || val < 0) setCartDiscount(0);
+                        }}
                         className="text-xs border rounded px-2 py-0.5 w-16"
                         placeholder="0"
                       />

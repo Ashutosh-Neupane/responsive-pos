@@ -219,10 +219,14 @@ export default function InventoryPage() {
                       <Input
                         id="quantity"
                         type="number"
-                        value={formData.quantity}
+                        value={formData.quantity === 0 ? '' : formData.quantity}
                         onChange={(e) =>
-                          setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })
+                          setFormData({ ...formData, quantity: e.target.value === '' ? 0 : parseInt(e.target.value) || 0 })
                         }
+                        onBlur={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (isNaN(val) || val < 0) setFormData({ ...formData, quantity: 0 });
+                        }}
                         required
                       />
                     </div>
@@ -232,10 +236,14 @@ export default function InventoryPage() {
                       <Input
                         id="reorder"
                         type="number"
-                        value={formData.reorder_level}
+                        value={formData.reorder_level === 0 ? '' : formData.reorder_level}
                         onChange={(e) =>
-                          setFormData({ ...formData, reorder_level: parseInt(e.target.value) || 0 })
+                          setFormData({ ...formData, reorder_level: e.target.value === '' ? 0 : parseInt(e.target.value) || 0 })
                         }
+                        onBlur={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (isNaN(val) || val < 0) setFormData({ ...formData, reorder_level: 0 });
+                        }}
                         required
                       />
                     </div>

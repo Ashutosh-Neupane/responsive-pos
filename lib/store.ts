@@ -289,12 +289,19 @@ export const useInventoryStore = create<InventoryState>()(
         const item = state.inventory.find((i) => i.product_id === productId);
         return item?.quantity ?? 0;
       },
-      updateStock: (productId, quantity) =>
+      updateStock: (productId, quantity) => {
         set((state) => ({
           inventory: state.inventory.map((item) =>
             item.product_id === productId ? { ...item, quantity, updated_at: new Date().toISOString() } : item
           ),
-        })),
+        }));
+        // Sync with product stock_quantity
+        const { updateProduct, products } = useProductsStore.getState();
+        const product = products.find(p => p.id === productId);
+        if (product) {
+          updateProduct({ ...product, stock_quantity: quantity });
+        }
+      },
       addInventoryItem: (item) =>
         set((state) => ({
           inventory: [...state.inventory, item],

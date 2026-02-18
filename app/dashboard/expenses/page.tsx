@@ -260,10 +260,14 @@ export default function ExpensesPage() {
                         id="amount"
                         type="number"
                         step="0.01"
-                        value={formData.amount}
+                        value={formData.amount || ''}
                         onChange={(e) =>
-                          setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
+                          setFormData({ ...formData, amount: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0 })
                         }
+                        onBlur={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (isNaN(val) || val < 0) setFormData({ ...formData, amount: 0 });
+                        }}
                         placeholder="0.00"
                         required
                       />
@@ -393,9 +397,13 @@ export default function ExpensesPage() {
                                 onChange={(e) =>
                                   setFormData({
                                     ...formData,
-                                    custom_repeat_days: parseInt(e.target.value) || 1,
+                                    custom_repeat_days: e.target.value === '' ? 1 : parseInt(e.target.value) || 1,
                                   })
                                 }
+                                onBlur={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  if (isNaN(val) || val < 1) setFormData({ ...formData, custom_repeat_days: 1 });
+                                }}
                                 placeholder="e.g., 15"
                                 className="text-sm"
                               />

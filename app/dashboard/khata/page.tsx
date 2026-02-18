@@ -186,6 +186,10 @@ export default function KhataPage() {
                         step="0.01"
                         value={paymentAmount}
                         onChange={(e) => setPaymentAmount(e.target.value)}
+                        onBlur={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (isNaN(val) || val < 0) setPaymentAmount('0');
+                        }}
                         placeholder="Enter amount"
                         required
                       />

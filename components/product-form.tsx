@@ -177,8 +177,12 @@ export function ProductForm({
                 type="number"
                 step="0.01"
                 required
-                value={formData.cost_price}
-                onChange={(e) => setFormData({ ...formData, cost_price: parseFloat(e.target.value) })}
+                value={formData.cost_price || ''}
+                onChange={(e) => setFormData({ ...formData, cost_price: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                onBlur={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (isNaN(val) || val < 0) setFormData({ ...formData, cost_price: 0 });
+                }}
                 placeholder="0.00"
               />
             </div>
@@ -189,8 +193,12 @@ export function ProductForm({
                 type="number"
                 step="0.01"
                 required
-                value={formData.selling_price}
-                onChange={(e) => setFormData({ ...formData, selling_price: parseFloat(e.target.value) })}
+                value={formData.selling_price || ''}
+                onChange={(e) => setFormData({ ...formData, selling_price: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                onBlur={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (isNaN(val) || val < 0) setFormData({ ...formData, selling_price: 0 });
+                }}
                 placeholder="0.00"
               />
             </div>
@@ -212,8 +220,13 @@ export function ProductForm({
                 step="0.01"
                 min="0"
                 max="100"
-                value={formData.discount_percentage || 0}
-                onChange={(e) => setFormData({ ...formData, discount_percentage: parseFloat(e.target.value) })}
+                value={formData.discount_percentage || ''}
+                onChange={(e) => setFormData({ ...formData, discount_percentage: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                onBlur={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (isNaN(val) || val < 0) setFormData({ ...formData, discount_percentage: 0 });
+                  else if (val > 100) setFormData({ ...formData, discount_percentage: 100 });
+                }}
                 placeholder="0.00"
               />
             </div>
@@ -224,8 +237,12 @@ export function ProductForm({
                 type="number"
                 step="0.01"
                 min="0"
-                value={formData.discount_amount || 0}
-                onChange={(e) => setFormData({ ...formData, discount_amount: parseFloat(e.target.value) })}
+                value={formData.discount_amount || ''}
+                onChange={(e) => setFormData({ ...formData, discount_amount: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+                onBlur={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (isNaN(val) || val < 0) setFormData({ ...formData, discount_amount: 0 });
+                }}
                 placeholder="0.00"
               />
             </div>
@@ -245,8 +262,13 @@ export function ProductForm({
               step="0.01"
               min="0"
               max="100"
-              value={formData.tax_percentage}
-              onChange={(e) => setFormData({ ...formData, tax_percentage: parseFloat(e.target.value) })}
+              value={formData.tax_percentage || ''}
+              onChange={(e) => setFormData({ ...formData, tax_percentage: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
+              onBlur={(e) => {
+                const val = parseFloat(e.target.value);
+                if (isNaN(val) || val < 0) setFormData({ ...formData, tax_percentage: 0 });
+                else if (val > 100) setFormData({ ...formData, tax_percentage: 100 });
+              }}
               placeholder="5"
             />
           </div>
@@ -276,8 +298,12 @@ export function ProductForm({
               <Input
                 type="number"
                 min="0"
-                value={formData.stock_quantity || 0}
-                onChange={(e) => setFormData({ ...formData, stock_quantity: parseInt(e.target.value) })}
+                value={formData.stock_quantity || ''}
+                onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value === '' ? 0 : parseInt(e.target.value) })}
+                onBlur={(e) => {
+                  const val = parseInt(e.target.value);
+                  if (isNaN(val) || val < 0) setFormData({ ...formData, stock_quantity: 0 });
+                }}
                 placeholder="0"
               />
             </div>
@@ -287,8 +313,12 @@ export function ProductForm({
               <Input
                 type="number"
                 min="0"
-                value={formData.reorder_level || 10}
-                onChange={(e) => setFormData({ ...formData, reorder_level: parseInt(e.target.value) })}
+                value={formData.reorder_level || ''}
+                onChange={(e) => setFormData({ ...formData, reorder_level: e.target.value === '' ? 0 : parseInt(e.target.value) })}
+                onBlur={(e) => {
+                  const val = parseInt(e.target.value);
+                  if (isNaN(val) || val < 0) setFormData({ ...formData, reorder_level: 0 });
+                }}
                 placeholder="10"
               />
             </div>
