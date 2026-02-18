@@ -31,7 +31,7 @@ export default function POSPage() {
   const [showTableSelector, setShowTableSelector] = useState(false);
 
   // Get stores
-  const { products, fetchProducts } = useProductsStore();
+  const { products, fetchProducts, getPOSProducts } = useProductsStore();
   const { currentSale, addItem, removeItem, updateItemQuantity, clearSale, setTable } = usePOSStore();
   const { customers, fetchCustomers } = useCustomersStore();
   const { addSale } = useSalesStore();
@@ -41,6 +41,9 @@ export default function POSPage() {
   const isRestaurant = shop?.category === 'restaurant';
   const tableMode = shop?.table_mode_enabled || false;
   const totalTables = shop?.total_tables || 0;
+
+  // Get only products that should show in POS
+  const posProducts = getPOSProducts();
 
   // Fetch data on mount and when shop changes
   useEffect(() => {
@@ -110,7 +113,7 @@ export default function POSPage() {
 
   // Search products
   const searchResults = searchQuery
-    ? products.filter(
+    ? posProducts.filter(
         (p) =>
           p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.sku.toLowerCase().includes(searchQuery.toLowerCase())
@@ -216,16 +219,16 @@ export default function POSPage() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
       <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header with Search & Info */}
-        <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 shadow-sm">
-          <div className="flex items-center justify-between gap-4 mb-3">
-            <h1 className="text-2xl font-bold text-slate-900">Point of Sale</h1>
-            <div className="flex items-center gap-3">
+        <header className="bg-white border-b border-slate-200 px-3 md:px-6 py-3 md:py-4 shadow-sm">
+          <div className="flex items-center justify-between gap-2 md:gap-4 mb-2 md:mb-3">
+            <h1 className="text-lg md:text-2xl font-bold text-slate-900">Point of Sale</h1>
+            <div className="flex items-center gap-2 md:gap-3">
               <ShopSelector />
               <LanguageSwitcher />
             </div>
@@ -233,24 +236,35 @@ export default function POSPage() {
           
           {/* Search Bar */}
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-2.5 md:top-3 h-4 w-4 text-slate-400" />
             <Input
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-10"
+              className="pl-10 h-9 md:h-10 text-sm"
             />
           </div>
         </header>
 
+        {/* Floating Cart Button - Mobile Only */}
+        {items.length > 0 && (
+          <button
+            onClick={() => setShowCart(true)}
+            className="md:hidden fixed bottom-20 right-4 z-40 bg-blue-600 text-white rounded-full p-4 shadow-lg flex items-center gap-2"
+          >
+            <ShoppingCart className="h-5 w-5" />
+            <span className="font-bold">{items.length}</span>
+          </button>
+        )}
+
         {/* Main Layout - Products left, Cart right (vertical) */}
-        <div className="flex-1 flex overflow-hidden gap-4 p-4 md:p-6 bg-slate-50">
-          {/* Left: Products Grid - 4 columns */}
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden gap-2 md:gap-4 p-2 md:p-6 bg-slate-50">
+          {/* Left: Products Grid */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Products Grid */}
             <div className="flex-1 overflow-y-auto">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 auto-rows-max pr-2">
-                {(searchQuery ? searchResults : products.slice(0, 100)).map((product) => {
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 auto-rows-max pr-1 md:pr-2">
+                {(searchQuery ? searchResults : posProducts.slice(0, 100)).map((product) => {
                   const stock = getStock(product.id);
                   const isOutOfStock = stock === 0;
                   return (
@@ -269,7 +283,7 @@ export default function POSPage() {
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                          <span className="text-2xl font-bold text-blue-600">{product.name.charAt(0)}</span>
+                          <span className="text-xl md:text-2xl font-bold text-blue-600">{product.name.charAt(0)}</span>
                         </div>
                       )}
                       {/* Quick Add Button */}
@@ -279,22 +293,22 @@ export default function POSPage() {
                           e.stopPropagation();
                           handleAddProduct(product.id);
                         }}
-                        className="absolute bottom-2 right-2 h-8 w-8 p-0 bg-blue-600 hover:bg-blue-700 shadow-lg"
+                        className="absolute bottom-1 right-1 md:bottom-2 md:right-2 h-7 w-7 md:h-8 md:w-8 p-0 bg-blue-600 hover:bg-blue-700 shadow-lg"
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                     </div>
 
                     {/* Product Info */}
-                    <div className="flex-1 p-2 flex flex-col justify-between">
+                    <div className="flex-1 p-1.5 md:p-2 flex flex-col justify-between">
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm line-clamp-2">{product.name}</p>
-                        <p className={`text-xs mt-1 ${stock <= 10 ? 'text-red-600 font-semibold' : 'text-slate-500'}`}>
+                        <p className="font-semibold text-xs md:text-sm line-clamp-2">{product.name}</p>
+                        <p className={`text-[10px] md:text-xs mt-0.5 md:mt-1 ${stock <= 10 ? 'text-red-600 font-semibold' : 'text-slate-500'}`}>
                           {isOutOfStock ? 'Out of Stock' : `Stock: ${stock}`}
                         </p>
                       </div>
                       <div className="mt-1">
-                        <p className="text-lg font-bold text-slate-900">Rs {product.selling_price.toFixed(0)}</p>
+                        <p className="text-base md:text-lg font-bold text-slate-900">Rs {product.selling_price.toFixed(0)}</p>
                       </div>
                     </div>
                   </div>
@@ -311,11 +325,11 @@ export default function POSPage() {
           </div>
 
           {/* Right: Cart - Vertical */}
-          <div className="w-96 flex flex-col bg-white rounded-lg border border-slate-300 shadow-lg overflow-hidden">
+          <div className="hidden md:flex w-full md:w-96 flex-col bg-white rounded-lg border border-slate-300 shadow-lg overflow-hidden">
             {/* Cart Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-4 flex items-center justify-between">
-              <h2 className="font-bold text-lg">Cart ({items.length})</h2>
-              <ShoppingCart className="h-5 w-5" />
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 md:py-4 flex items-center justify-between">
+              <h2 className="font-bold text-base md:text-lg">Cart ({items.length})</h2>
+              <ShoppingCart className="h-4 w-4 md:h-5 md:w-5" />
             </div>
 
             {items.length === 0 ? (

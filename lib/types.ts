@@ -36,6 +36,10 @@ export interface Shop {
   currency: string; // NPR, USD, etc.
   table_mode_enabled?: boolean; // Restaurant table mode
   total_tables?: number; // Total number of tables
+  // IRD Compliance Fields
+  pan_number?: string; // Permanent Account Number
+  vat_number?: string; // VAT Registration Number
+  ird_registered?: boolean; // IRD registered business
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -77,11 +81,11 @@ export interface Product {
   name: string;
   description?: string;
   category: string;
-  unit: string; // kg, liter, piece, box, etc.
+  unit: string; // kg, liter, piece, box, plate, bowl, cup, bottle, etc.
   cost_price: number;
   selling_price: number;
   margin_percentage: number;
-  tax_percentage: number;
+  tax_percentage: number; // 13% VAT for Nepal
   discount_percentage?: number; // Optional percentage discount
   discount_amount?: number; // Optional fixed amount discount
   image_url?: string; // Product image URL
@@ -93,6 +97,7 @@ export interface Product {
   reorder_level?: number; // Low stock warning level
   is_raw_material?: boolean; // True if used as ingredient
   has_recipe?: boolean; // True if product is made from recipe
+  show_in_pos?: boolean; // Show in POS (false for raw materials)
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -178,6 +183,7 @@ export interface Customer {
   phone: string;
   email?: string;
   address?: string;
+  pan_number?: string; // For IRD compliance
   is_active: boolean;
   created_at: string;
   updated_at: string;

@@ -1,6 +1,9 @@
 {
-  "name": "my-project",
-  "version": "0.1.0",
+  "name": "sudha-nepali-pos",
+  "version": "1.0.0",
+  "description": "Modern POS system for Nepali businesses with multi-language support and restaurant features",
+  "author": "Sudha Nepali",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",

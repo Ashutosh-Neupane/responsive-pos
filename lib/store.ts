@@ -174,6 +174,8 @@ interface ProductsState {
   deleteProduct: (productId: string) => void;
   searchProducts: (query: string) => Product[];
   getProductsByShop: (shopId: string) => Product[];
+  getPOSProducts: () => Product[]; // Get products visible in POS
+  getRawMaterials: () => Product[]; // Get raw materials only
 }
 
 export const useProductsStore = create<ProductsState>()(
@@ -236,6 +238,14 @@ export const useProductsStore = create<ProductsState>()(
       getProductsByShop: (shopId) => {
         const state = get();
         return state.products.filter((p) => p.shop_id === shopId);
+      },
+      getPOSProducts: () => {
+        const state = get();
+        return state.products.filter((p) => p.show_in_pos !== false && p.is_active);
+      },
+      getRawMaterials: () => {
+        const state = get();
+        return state.products.filter((p) => p.is_raw_material === true);
       },
     }),
     {
