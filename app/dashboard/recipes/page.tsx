@@ -76,20 +76,20 @@ export default function RecipesPage() {
     <div className="flex h-screen bg-gradient-to-br from-orange-50 to-red-50">
       <Sidebar />
 
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <main className="flex-1 overflow-auto pb-16 md:pb-0">
+        <div className="p-2 sm:p-4 md:p-6 max-w-6xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-orange-900 flex items-center gap-2">
-                <ChefHat className="h-8 w-8" />
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-orange-900 flex items-center gap-2">
+                <ChefHat className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8" />
                 Recipe Management
               </h1>
-              <p className="text-orange-700">Create recipes from raw materials</p>
+              <p className="text-xs sm:text-sm text-orange-700">Create recipes from raw materials</p>
             </div>
             <Button
               onClick={() => setShowForm(true)}
-              className="bg-orange-600 hover:bg-orange-700"
+              className="bg-orange-600 hover:bg-orange-700 text-sm w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Recipe

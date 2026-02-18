@@ -129,20 +129,20 @@ export default function CustomersPage() {
     <div className="flex h-screen bg-slate-50">
       <Sidebar />
 
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <main className="flex-1 overflow-auto pb-16 md:pb-0">
+        <div className="p-2 sm:p-4 md:p-6 max-w-6xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">Customers</h1>
-              <p className="text-slate-600">Manage your customer database</p>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">Customers</h1>
+              <p className="text-xs sm:text-sm text-slate-600">Manage your customer database</p>
             </div>
             <Button
               onClick={() => {
                 handleReset();
                 setShowForm(true);
               }}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-sm w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Customer
@@ -267,7 +267,7 @@ export default function CustomersPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {filteredCustomers.map((customer) => {
                 const khata = getCustomerKhata(customer.id);
                 const creditBalance = khata ? khata.balance : 0;

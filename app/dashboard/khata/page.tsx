@@ -81,17 +81,17 @@ export default function KhataPage() {
     <div className="flex h-screen bg-slate-50">
       <Sidebar />
 
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <main className="flex-1 overflow-auto pb-16 md:pb-0">
+        <div className="p-2 sm:p-4 md:p-6 max-w-6xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
           {/* Header */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">Khata Management</h1>
-              <p className="text-slate-600">Track customer credit and payments</p>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">Khata Management</h1>
+              <p className="text-xs sm:text-sm text-slate-600">Track customer credit and payments</p>
             </div>
             <Button
               onClick={() => setShowPaymentForm(true)}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 text-sm w-full sm:w-auto"
             >
               <DollarSign className="h-4 w-4 mr-2" />
               Record Payment
@@ -99,36 +99,36 @@ export default function KhataPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Total Credit</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Total Credit</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">Rs {totalCredit.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
-                <p className="text-xs text-slate-600">Given to customers</p>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold truncate">Rs {(totalCredit / 1000).toFixed(0)}k</div>
+                <p className="text-[10px] sm:text-xs text-slate-600">Given</p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Amount Paid</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Paid</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-700">Rs {totalPaid.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
-                <p className="text-xs text-slate-600">Recovered from customers</p>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-700 truncate">Rs {(totalPaid / 1000).toFixed(0)}k</div>
+                <p className="text-[10px] sm:text-xs text-slate-600">Recovered</p>
               </CardContent>
             </Card>
 
             <Card className={totalOutstanding > 0 ? 'border-orange-200 bg-orange-50' : ''}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Due</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${totalOutstanding > 0 ? 'text-orange-700' : 'text-green-700'}`}>
-                  Rs {totalOutstanding.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                <div className={`text-lg sm:text-xl md:text-2xl font-bold truncate ${totalOutstanding > 0 ? 'text-orange-700' : 'text-green-700'}`}>
+                  Rs {(totalOutstanding / 1000).toFixed(0)}k
                 </div>
-                <p className="text-xs text-slate-600">To be collected</p>
+                <p className="text-[10px] sm:text-xs text-slate-600">To collect</p>
               </CardContent>
             </Card>
           </div>
