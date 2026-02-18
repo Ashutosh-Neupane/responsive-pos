@@ -537,75 +537,215 @@ export default function POSPage() {
 
         {/* Mobile Cart Bottom Sheet */}
         {showCart && (
-          <div className="lg:hidden fixed inset-0 bg-black/50 z-50 flex items-end" onClick={() => setShowCart(false)}>
-            <div className="w-full bg-white rounded-t-2xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-              <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between rounded-t-2xl">
+          <div className="lg:hidden fixed inset-0 z-50 flex items-end">
+            {/* Semi-transparent backdrop - allows clicking products */}
+            <div className="absolute inset-0 bg-black/30" onClick={() => setShowCart(false)} />
+            
+            {/* Cart Sheet */}
+            <div className="relative w-full bg-white rounded-t-2xl max-h-[70vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              {/* Cart Header */}
+              <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between rounded-t-2xl flex-shrink-0">
                 <h2 className="font-bold">Cart ({items.length})</h2>
                 <button onClick={() => setShowCart(false)}>
                   <X className="h-6 w-6" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+              
+              {/* Cart Items */}
+              <div className="flex-1 overflow-y-auto p-2 space-y-1">
                 {items.map((item) => {
                   const variants = getVariants(item.product_id);
+                  const product = products.find(p => p.id === item.product_id);
+                  const itemDiscount = itemDiscounts[item.id] || { type: 'percentage', value: 0 };
+                  
                   return (
-                  <div key={item.id} className="bg-slate-50 rounded p-2 border text-xs">
-                    <div className="flex items-center gap-2 mb-2">
-                      {variants.length > 0 ? (
-                        <select
-                          value={item.product_id}
-                          onChange={(e) => switchVariant(item.id, e.target.value)}
-                          className="flex-1 text-xs font-semibold bg-white border rounded px-2 py-1"
-                        >
-                          <option value={item.product_id}>{item.product_name}</option>
-                          {variants.map(v => (
-                            <option key={v.id} value={v.id}>{v.name}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <p className="flex-1 font-semibold">{item.product_name}</p>
-                      )}
-                      <button onClick={() => removeItem(item.id)} className="text-red-600">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2 bg-white rounded border">
-                        <button onClick={() => updateItemQuantity(item.id, Math.max(1, item.quantity - 1))} className="p-2">
-                          <Minus className="h-4 w-4" />
+                  <div key={item.id} className="bg-slate-50 rounded p-1.5 border text-xs">
+                    {/* Main Row */}
+                    <div className="flex items-center gap-1.5">
+                      {/* Product Image */}
+                      <div className="w-10 h-10 rounded bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center flex-shrink-0">
+                        {product?.image_url ? (
+                          <img src={product.image_url} alt={item.product_name} className="w-full h-full object-cover rounded" />
+                        ) : (
+                          <span className="text-sm font-bold text-blue-600">{item.product_name.charAt(0)}</span>
+                        )}
+                      </div>
+                      
+                      {/* Product Name & Variant */}
+                      <div className="flex-1 min-w-0">
+                        {variants.length > 0 ? (
+                          <select
+                            value={item.product_id}
+                            onChange={(e) => switchVariant(item.id, e.target.value)}
+                            className="w-full text-xs font-semibold bg-transparent border-0 p-0 focus:ring-0"
+                          >
+                            <option value={item.product_id}>{item.product_name}</option>
+                            {variants.map(v => (
+                              <option key={v.id} value={v.id}>{v.name}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <p className="font-semibold truncate">{item.product_name}</p>
+                        )}
+                      </div>
+                      
+                      {/* Quantity Controls */}
+                      <div className="flex items-center gap-0.5 bg-white rounded border">
+                        <button onClick={() => updateItemQuantity(item.id, Math.max(1, item.quantity - 1))} className="p-1">
+                          <Minus className="h-3 w-3" />
                         </button>
-                        <span className="w-8 text-center font-semibold">{item.quantity}</span>
-                        <button onClick={() => updateItemQuantity(item.id, item.quantity + 1)} className="p-2">
-                          <Plus className="h-4 w-4" />
+                        <span className="w-6 text-center font-semibold">{item.quantity}</span>
+                        <button onClick={() => updateItemQuantity(item.id, item.quantity + 1)} className="p-1">
+                          <Plus className="h-3 w-3" />
                         </button>
                       </div>
-                      <p className="font-bold">Rs {item.total_amount.toFixed(0)}</p>
+                      
+                      {/* Price */}
+                      <span className="font-bold w-14 text-right">Rs {item.total_amount.toFixed(0)}</span>
+                      
+                      {/* Remove */}
+                      <button onClick={() => removeItem(item.id)} className="text-red-600 p-0.5">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                    
+                    {/* Discount Row */}
+                    <div className="flex items-center gap-1 mt-1 pt-1 border-t">
+                      <span className="text-[10px] text-slate-600">Disc:</span>
+                      <select
+                        value={itemDiscount.type}
+                        onChange={(e) => setItemDiscounts({...itemDiscounts, [item.id]: {...itemDiscount, type: e.target.value as any}})}
+                        className="text-[10px] border rounded px-1 py-0.5 w-12"
+                      >
+                        <option value="percentage">%</option>
+                        <option value="fixed">Rs</option>
+                      </select>
+                      <input
+                        type="number"
+                        min="0"
+                        value={itemDiscount.value || ''}
+                        onChange={(e) => setItemDiscounts({...itemDiscounts, [item.id]: {...itemDiscount, value: e.target.value === '' ? 0 : parseFloat(e.target.value) || 0}})}
+                        onBlur={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (isNaN(val) || val < 0) setItemDiscounts({...itemDiscounts, [item.id]: {...itemDiscount, value: 0}});
+                        }}
+                        className="text-[10px] border rounded px-1 py-0.5 w-12"
+                        placeholder="0"
+                      />
+                      <span className="text-[10px] text-slate-500">@Rs {item.unit_price.toFixed(0)}</span>
                     </div>
                   </div>
                   );
                 })}
               </div>
-              <div className="border-t p-4 space-y-3">
-                <div className="space-y-1 text-sm">
+              
+              {/* Summary & Actions */}
+              <div className="flex-shrink-0 border-t">
+                {/* Summary */}
+                <div className="p-2 bg-slate-50 space-y-0.5 text-xs">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
                     <span className="font-semibold">Rs {subtotal.toFixed(0)}</span>
                   </div>
+                  {(totalDiscount > 0 || cartDiscount > 0) && (
+                    <div className="flex justify-between text-green-700">
+                      <span>Discount:</span>
+                      <span className="font-semibold">-Rs {(totalDiscount + cartDiscount).toFixed(0)}</span>
+                    </div>
+                  )}
                   {totalTax > 0 && (
                     <div className="flex justify-between">
-                      <span>VAT:</span>
+                      <span>VAT (13%):</span>
                       <span className="font-semibold">Rs {totalTax.toFixed(0)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between font-bold text-base border-t pt-1">
+                  <div className="flex justify-between font-bold text-sm border-t pt-0.5">
                     <span>Total:</span>
                     <span className="text-blue-600">Rs {totalAmount.toFixed(0)}</span>
                   </div>
                 </div>
-                <Button onClick={handleCompleteSale} disabled={isProcessing} className="w-full bg-green-600 h-12">
-                  <DollarSign className="h-5 w-5 mr-2" />
-                  {isProcessing ? 'Processing...' : 'Complete Sale'}
-                </Button>
+
+                {/* Extra Discount */}
+                <div className="px-2 py-1.5 border-t bg-yellow-50">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold text-slate-700">Extra Disc:</span>
+                    <select
+                      value={discountType}
+                      onChange={(e) => setDiscountType(e.target.value as any)}
+                      className="text-[10px] border rounded px-1 py-0.5 w-10"
+                    >
+                      <option value="percentage">%</option>
+                      <option value="fixed">Rs</option>
+                    </select>
+                    <input
+                      type="number"
+                      min="0"
+                      value={cartDiscount || ''}
+                      onChange={(e) => setCartDiscount(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                      onBlur={(e) => {
+                        const val = parseFloat(e.target.value);
+                        if (isNaN(val) || val < 0) setCartDiscount(0);
+                      }}
+                      className="text-[10px] border rounded px-1 py-0.5 w-14"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                {/* Payment Options */}
+                <div className="p-2 space-y-1.5">
+                  {isRestaurant && tableMode && (
+                    <select
+                      value={selectedTable || ''}
+                      onChange={(e) => setSelectedTable(e.target.value ? parseInt(e.target.value) : null)}
+                      className="w-full px-2 py-1.5 border rounded text-xs"
+                    >
+                      <option value="">Select Table</option>
+                      {Array.from({ length: totalTables }, (_, i) => i + 1).map((num) => (
+                        <option key={num} value={num}>Table {num}</option>
+                      ))}
+                    </select>
+                  )}
+                  <select
+                    value={selectedCustomer || ''}
+                    onChange={(e) => setSelectedCustomer(e.target.value || null)}
+                    className="w-full px-2 py-1.5 border rounded text-xs"
+                  >
+                    <option value="">Walk-in</option>
+                    {customers.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value as any)}
+                    className="w-full px-2 py-1.5 border rounded text-xs"
+                  >
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="online">Online</option>
+                  </select>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="p-2 space-y-1.5">
+                  <Button
+                    onClick={handleCompleteSale}
+                    disabled={isProcessing}
+                    className="w-full bg-green-600 hover:bg-green-700 h-10"
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    {isProcessing ? 'Processing...' : 'Complete Sale'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => { clearSale(); setSearchQuery(''); setShowCart(false); }}
+                    className="w-full h-7 text-xs"
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" />
+                    Clear Cart
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
