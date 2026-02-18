@@ -12,7 +12,7 @@ import {
   useAuthStore,
   useInventoryStore,
 } from '@/lib/store';
-import { Plus, Minus, Trash2, Search, DollarSign, ShoppingCart, X, RefreshCw, UtensilsCrossed } from 'lucide-react';
+import { Plus, Minus, Trash2, Search, DollarSign, ShoppingCart, X, RefreshCw, UtensilsCrossed, Printer } from 'lucide-react';
 import type { SaleItem, Sale } from '@/lib/types';
 import { ShopSelector } from '@/components/shop-selector';
 import { LanguageSwitcher } from '@/components/language-switcher';
@@ -29,6 +29,9 @@ export default function POSPage() {
   const [switchingVariant, setSwitchingVariant] = useState<string | null>(null);
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [showTableSelector, setShowTableSelector] = useState(false);
+  const [itemDiscounts, setItemDiscounts] = useState<Record<string, { type: 'percentage' | 'fixed'; value: number }>>({});
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [completedSale, setCompletedSale] = useState<Sale | null>(null);
 
   // Get stores
   const { products, fetchProducts, getPOSProducts } = useProductsStore();
@@ -203,13 +206,17 @@ export default function POSPage() {
         updateStock(item.product_id, currentStock - item.quantity);
       });
 
-      // Show success and reset
-      alert(`Sale completed! Invoice: ${sale.sale_number}${selectedTable ? ` | Table: ${selectedTable}` : ''}`);
+      // Show invoice
+      setCompletedSale(sale);
+      setShowInvoice(true);
+      
+      // Clear cart
       clearSale();
       setSelectedCustomer(null);
       setSelectedTable(null);
       setSearchQuery('');
       setPaymentMethod('cash');
+      setItemDiscounts({});
     } catch (error) {
       alert('Error completing sale');
       console.error('[v0] Error:', error);
@@ -224,22 +231,22 @@ export default function POSPage() {
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <header className="bg-white border-b border-slate-200 px-3 md:px-4 py-2 md:py-3 shadow-sm flex-shrink-0">
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <h1 className="text-base md:text-2xl font-bold text-slate-900">POS</h1>
-            <div className="flex items-center gap-2">
+        <header className="bg-white border-b border-slate-200 px-3 md:px-4 py-2 shadow-sm flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <h1 className="text-base md:text-xl font-bold text-slate-900 flex-shrink-0">POS</h1>
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-2 top-2 h-3.5 w-3.5 text-slate-400" />
+              <Input
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-7 text-xs"
+              />
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
               <ShopSelector />
               <LanguageSwitcher />
             </div>
-          </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-            <Input
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-9 text-sm"
-            />
           </div>
         </header>
 
@@ -285,32 +292,78 @@ export default function POSPage() {
             ) : (
               <>
                 {/* Cart Items */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                  {items.map((item) => (
-                    <div key={item.id} className="bg-slate-50 rounded p-2 border">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1 pr-2">
-                          <p className="font-semibold text-sm line-clamp-1">{item.product_name}</p>
-                          <p className="text-xs text-slate-600">Rs {item.unit_price.toFixed(0)}</p>
+                <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                  {items.map((item) => {
+                    const variants = getVariants(item.product_id);
+                    const product = products.find(p => p.id === item.product_id);
+                    const itemDiscount = itemDiscounts[item.id] || { type: 'percentage', value: 0 };
+                    
+                    return (
+                    <div key={item.id} className="bg-slate-50 rounded p-1.5 border text-xs">
+                      {/* Main Row - One Line */}
+                      <div className="flex items-center gap-1">
+                        {/* Product Name & Variant Selector */}
+                        <div className="flex-1 min-w-0">
+                          {variants.length > 0 ? (
+                            <select
+                              value={item.product_id}
+                              onChange={(e) => switchVariant(item.id, e.target.value)}
+                              className="w-full text-xs font-semibold bg-transparent border-0 p-0 focus:ring-0 cursor-pointer"
+                            >
+                              <option value={item.product_id}>{item.product_name}</option>
+                              {variants.map(v => (
+                                <option key={v.id} value={v.id}>{v.name}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <p className="font-semibold truncate">{item.product_name}</p>
+                          )}
                         </div>
-                        <button onClick={() => removeItem(item.id)} className="text-red-600 p-1">
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 bg-white rounded border">
-                          <button onClick={() => updateItemQuantity(item.id, Math.max(1, item.quantity - 1))} className="p-1">
+                        
+                        {/* Quantity Controls */}
+                        <div className="flex items-center gap-0.5 bg-white rounded border">
+                          <button onClick={() => updateItemQuantity(item.id, Math.max(1, item.quantity - 1))} className="p-0.5">
                             <Minus className="h-3 w-3" />
                           </button>
-                          <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
-                          <button onClick={() => updateItemQuantity(item.id, item.quantity + 1)} className="p-1">
+                          <span className="w-6 text-center font-semibold">{item.quantity}</span>
+                          <button onClick={() => updateItemQuantity(item.id, item.quantity + 1)} className="p-0.5">
                             <Plus className="h-3 w-3" />
                           </button>
                         </div>
-                        <p className="font-bold text-sm">Rs {item.total_amount.toFixed(0)}</p>
+                        
+                        {/* Price */}
+                        <span className="font-bold w-16 text-right">Rs {item.total_amount.toFixed(0)}</span>
+                        
+                        {/* Remove */}
+                        <button onClick={() => removeItem(item.id)} className="text-red-600 p-0.5">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                      
+                      {/* Discount Row */}
+                      <div className="flex items-center gap-1 mt-1 pt-1 border-t">
+                        <span className="text-[10px] text-slate-600">Disc:</span>
+                        <select
+                          value={itemDiscount.type}
+                          onChange={(e) => setItemDiscounts({...itemDiscounts, [item.id]: {...itemDiscount, type: e.target.value as any}})}
+                          className="text-[10px] border rounded px-1 py-0.5 w-12"
+                        >
+                          <option value="percentage">%</option>
+                          <option value="fixed">Rs</option>
+                        </select>
+                        <input
+                          type="number"
+                          min="0"
+                          value={itemDiscount.value}
+                          onChange={(e) => setItemDiscounts({...itemDiscounts, [item.id]: {...itemDiscount, value: parseFloat(e.target.value) || 0}})}
+                          className="text-[10px] border rounded px-1 py-0.5 w-12"
+                          placeholder="0"
+                        />
+                        <span className="text-[10px] text-slate-500">@Rs {item.unit_price.toFixed(0)}</span>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Summary & Actions */}
@@ -417,13 +470,25 @@ export default function POSPage() {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                {items.map((item) => (
-                  <div key={item.id} className="bg-slate-50 rounded p-2 border">
-                    <div className="flex justify-between mb-2">
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm">{item.product_name}</p>
-                        <p className="text-xs text-slate-600">Rs {item.unit_price.toFixed(0)}</p>
-                      </div>
+                {items.map((item) => {
+                  const variants = getVariants(item.product_id);
+                  return (
+                  <div key={item.id} className="bg-slate-50 rounded p-2 border text-xs">
+                    <div className="flex items-center gap-2 mb-2">
+                      {variants.length > 0 ? (
+                        <select
+                          value={item.product_id}
+                          onChange={(e) => switchVariant(item.id, e.target.value)}
+                          className="flex-1 text-xs font-semibold bg-white border rounded px-2 py-1"
+                        >
+                          <option value={item.product_id}>{item.product_name}</option>
+                          {variants.map(v => (
+                            <option key={v.id} value={v.id}>{v.name}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className="flex-1 font-semibold">{item.product_name}</p>
+                      )}
                       <button onClick={() => removeItem(item.id)} className="text-red-600">
                         <X className="h-4 w-4" />
                       </button>
@@ -441,7 +506,8 @@ export default function POSPage() {
                       <p className="font-bold">Rs {item.total_amount.toFixed(0)}</p>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="border-t p-4 space-y-3">
                 <div className="space-y-1 text-sm">
@@ -464,6 +530,114 @@ export default function POSPage() {
                   <DollarSign className="h-5 w-5 mr-2" />
                   {isProcessing ? 'Processing...' : 'Complete Sale'}
                 </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Invoice Modal */}
+        {showInvoice && completedSale && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowInvoice(false)}>
+            <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
+                <h2 className="font-bold text-lg">Invoice</h2>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => window.print()} className="bg-blue-600">
+                    <Printer className="h-4 w-4 mr-1" />
+                    Print
+                  </Button>
+                  <button onClick={() => setShowInvoice(false)} className="text-slate-600">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6 font-mono text-sm">
+                {/* Invoice Header */}
+                <div className="text-center border-b-2 border-dashed pb-3 mb-3">
+                  <h1 className="text-lg font-bold">{shop?.name}</h1>
+                  {shop?.ird_registered && <p className="text-xs font-bold mt-1">TAX INVOICE</p>}
+                  <p className="text-xs mt-1">{shop?.address}</p>
+                  <p className="text-xs">Phone: {shop?.phone}</p>
+                  {shop?.pan_number && <p className="text-xs">PAN: {shop?.pan_number}</p>}
+                  {shop?.vat_number && <p className="text-xs">VAT: {shop?.vat_number}</p>}
+                </div>
+
+                {/* Invoice Details */}
+                <div className="text-xs space-y-1 mb-3">
+                  <div className="flex justify-between">
+                    <span>Invoice:</span>
+                    <span className="font-bold">{completedSale.sale_number}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Date:</span>
+                    <span>{new Date(completedSale.created_at).toLocaleString()}</span>
+                  </div>
+                  {completedSale.table_number && (
+                    <div className="flex justify-between">
+                      <span>Table:</span>
+                      <span className="font-bold">#{completedSale.table_number}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Payment:</span>
+                    <span className="uppercase">{completedSale.payment_method}</span>
+                  </div>
+                </div>
+
+                {/* Items */}
+                <div className="border-t-2 border-b-2 border-dashed py-2 mb-3">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-1">Item</th>
+                        <th className="text-center">Qty</th>
+                        <th className="text-right">Rate</th>
+                        <th className="text-right">Amt</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {completedSale.items.map((item, idx) => (
+                        <tr key={idx} className="border-b">
+                          <td className="py-1">{item.product_name}</td>
+                          <td className="text-center">{item.quantity}</td>
+                          <td className="text-right">{item.unit_price.toFixed(0)}</td>
+                          <td className="text-right font-semibold">{item.subtotal.toFixed(0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Totals */}
+                <div className="text-xs space-y-1 mb-3">
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>Rs {completedSale.subtotal.toFixed(2)}</span>
+                  </div>
+                  {completedSale.discount_amount > 0 && (
+                    <div className="flex justify-between text-green-700">
+                      <span>Discount:</span>
+                      <span>-Rs {completedSale.discount_amount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>VAT (13%):</span>
+                    <span>Rs {completedSale.tax_amount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-base border-t-2 pt-2 mt-2">
+                    <span>TOTAL:</span>
+                    <span>Rs {completedSale.total_amount.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="text-center text-xs border-t border-dashed pt-3 space-y-1">
+                  <p className="font-semibold">Thank you for your visit!</p>
+                  {shop?.ird_registered && (
+                    <p className="text-xs text-slate-600">Computer generated invoice</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
