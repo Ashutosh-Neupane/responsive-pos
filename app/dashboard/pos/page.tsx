@@ -537,22 +537,22 @@ export default function POSPage() {
 
         {/* Mobile Cart Bottom Sheet */}
         {showCart && (
-          <div className="lg:hidden fixed inset-0 z-50 flex items-end">
-            {/* Semi-transparent backdrop - allows clicking products */}
+          <div className="lg:hidden fixed inset-0 z-[60] flex items-end">
+            {/* Semi-transparent backdrop */}
             <div className="absolute inset-0 bg-black/30" onClick={() => setShowCart(false)} />
             
             {/* Cart Sheet */}
-            <div className="relative w-full bg-white rounded-t-2xl max-h-[70vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="relative w-full bg-white rounded-t-2xl flex flex-col shadow-2xl" style={{ maxHeight: 'calc(100vh - 80px)' }} onClick={(e) => e.stopPropagation()}>
               {/* Cart Header */}
-              <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between rounded-t-2xl flex-shrink-0">
-                <h2 className="font-bold">Cart ({items.length})</h2>
+              <div className="bg-blue-600 text-white px-3 py-2 flex items-center justify-between rounded-t-2xl flex-shrink-0">
+                <h2 className="font-bold text-sm">Cart ({items.length})</h2>
                 <button onClick={() => setShowCart(false)}>
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
               
-              {/* Cart Items */}
-              <div className="flex-1 overflow-y-auto p-2 space-y-1">
+              {/* Cart Items - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-2 space-y-1 min-h-0">
                 {items.map((item) => {
                   const variants = getVariants(item.product_id);
                   const product = products.find(p => p.id === item.product_id);
@@ -560,9 +560,7 @@ export default function POSPage() {
                   
                   return (
                   <div key={item.id} className="bg-slate-50 rounded p-1.5 border text-xs">
-                    {/* Main Row */}
                     <div className="flex items-center gap-1.5">
-                      {/* Product Image */}
                       <div className="w-10 h-10 rounded bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center flex-shrink-0">
                         {product?.image_url ? (
                           <img src={product.image_url} alt={item.product_name} className="w-full h-full object-cover rounded" />
@@ -570,8 +568,6 @@ export default function POSPage() {
                           <span className="text-sm font-bold text-blue-600">{item.product_name.charAt(0)}</span>
                         )}
                       </div>
-                      
-                      {/* Product Name & Variant */}
                       <div className="flex-1 min-w-0">
                         {variants.length > 0 ? (
                           <select
@@ -588,8 +584,6 @@ export default function POSPage() {
                           <p className="font-semibold truncate">{item.product_name}</p>
                         )}
                       </div>
-                      
-                      {/* Quantity Controls */}
                       <div className="flex items-center gap-0.5 bg-white rounded border">
                         <button onClick={() => updateItemQuantity(item.id, Math.max(1, item.quantity - 1))} className="p-1">
                           <Minus className="h-3 w-3" />
@@ -599,17 +593,11 @@ export default function POSPage() {
                           <Plus className="h-3 w-3" />
                         </button>
                       </div>
-                      
-                      {/* Price */}
                       <span className="font-bold w-14 text-right">Rs {item.total_amount.toFixed(0)}</span>
-                      
-                      {/* Remove */}
                       <button onClick={() => removeItem(item.id)} className="text-red-600 p-0.5">
                         <X className="h-3 w-3" />
                       </button>
                     </div>
-                    
-                    {/* Discount Row */}
                     <div className="flex items-center gap-1 mt-1 pt-1 border-t">
                       <span className="text-[10px] text-slate-600">Disc:</span>
                       <select
@@ -639,10 +627,10 @@ export default function POSPage() {
                 })}
               </div>
               
-              {/* Summary & Actions */}
-              <div className="flex-shrink-0 border-t">
+              {/* Fixed Bottom Section */}
+              <div className="flex-shrink-0 border-t bg-white">
                 {/* Summary */}
-                <div className="p-2 bg-slate-50 space-y-0.5 text-xs">
+                <div className="px-2 py-1 bg-slate-50 space-y-0.5 text-xs">
                   <div className="flex justify-between">
                     <span>Subtotal:</span>
                     <span className="font-semibold">Rs {subtotal.toFixed(0)}</span>
@@ -666,9 +654,9 @@ export default function POSPage() {
                 </div>
 
                 {/* Extra Discount */}
-                <div className="px-2 py-1.5 border-t bg-yellow-50">
+                <div className="px-2 py-1 border-t bg-yellow-50">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-semibold text-slate-700">Extra Disc:</span>
+                    <span className="text-[10px] font-semibold text-slate-700">Extra:</span>
                     <select
                       value={discountType}
                       onChange={(e) => setDiscountType(e.target.value as any)}
@@ -692,49 +680,51 @@ export default function POSPage() {
                   </div>
                 </div>
 
-                {/* Payment Options */}
-                <div className="p-2 space-y-1.5">
-                  {isRestaurant && tableMode && (
+                {/* Payment Options - 2 Column */}
+                <div className="px-2 py-1 border-t">
+                  <div className="grid grid-cols-2 gap-1">
+                    {isRestaurant && tableMode && (
+                      <select
+                        value={selectedTable || ''}
+                        onChange={(e) => setSelectedTable(e.target.value ? parseInt(e.target.value) : null)}
+                        className="col-span-2 px-2 py-1 border rounded text-xs"
+                      >
+                        <option value="">Table</option>
+                        {Array.from({ length: totalTables }, (_, i) => i + 1).map((num) => (
+                          <option key={num} value={num}>Table {num}</option>
+                        ))}
+                      </select>
+                    )}
                     <select
-                      value={selectedTable || ''}
-                      onChange={(e) => setSelectedTable(e.target.value ? parseInt(e.target.value) : null)}
-                      className="w-full px-2 py-1.5 border rounded text-xs"
+                      value={selectedCustomer || ''}
+                      onChange={(e) => setSelectedCustomer(e.target.value || null)}
+                      className="px-2 py-1 border rounded text-xs"
                     >
-                      <option value="">Select Table</option>
-                      {Array.from({ length: totalTables }, (_, i) => i + 1).map((num) => (
-                        <option key={num} value={num}>Table {num}</option>
+                      <option value="">Walk-in</option>
+                      {customers.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
                     </select>
-                  )}
-                  <select
-                    value={selectedCustomer || ''}
-                    onChange={(e) => setSelectedCustomer(e.target.value || null)}
-                    className="w-full px-2 py-1.5 border rounded text-xs"
-                  >
-                    <option value="">Walk-in</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value as any)}
-                    className="w-full px-2 py-1.5 border rounded text-xs"
-                  >
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                    <option value="online">Online</option>
-                  </select>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value as any)}
+                      className="px-2 py-1 border rounded text-xs"
+                    >
+                      <option value="cash">Cash</option>
+                      <option value="card">Card</option>
+                      <option value="online">Online</option>
+                    </select>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="p-2 space-y-1.5">
+                <div className="px-2 py-1.5 space-y-1">
                   <Button
                     onClick={handleCompleteSale}
                     disabled={isProcessing}
-                    className="w-full bg-green-600 hover:bg-green-700 h-10"
+                    className="w-full bg-green-600 hover:bg-green-700 h-9 text-sm font-semibold"
                   >
-                    <DollarSign className="h-4 w-4 mr-2" />
+                    <DollarSign className="h-4 w-4 mr-1" />
                     {isProcessing ? 'Processing...' : 'Complete Sale'}
                   </Button>
                   <Button
@@ -743,7 +733,7 @@ export default function POSPage() {
                     className="w-full h-7 text-xs"
                   >
                     <Trash2 className="h-3 w-3 mr-1" />
-                    Clear Cart
+                    Clear
                   </Button>
                 </div>
               </div>

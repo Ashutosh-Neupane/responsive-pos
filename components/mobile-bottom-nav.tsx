@@ -22,6 +22,8 @@ const bottomNavItems = [
   { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS', roles: ['owner', 'manager', 'cashier', 'staff'], categories: ['all'] },
   { href: '/dashboard/products', icon: Package, label: 'Products', roles: ['owner', 'manager'], categories: ['all'] },
   { href: '/dashboard/customers', icon: Users, label: 'Customers', roles: ['owner', 'manager', 'cashier'], categories: ['all'] },
+  { href: '/dashboard/inventory', icon: BarChart3, label: 'Inventory', roles: ['owner', 'manager'], categories: ['all'] },
+  { href: '/dashboard/analytics', icon: BarChart3, label: 'Analytics', roles: ['owner', 'manager'], categories: ['all'] },
 ];
 
 export function MobileBottomNav() {
@@ -39,8 +41,8 @@ export function MobileBottomNav() {
     <>
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 safe-area-bottom">
-        <div className={`grid h-16 ${visibleItems.length <= 4 ? `grid-cols-${visibleItems.length}` : 'grid-cols-5'}`}>
-          {visibleItems.slice(0, visibleItems.length <= 4 ? 4 : 4).map((item) => {
+        <div className="grid h-16" style={{ gridTemplateColumns: `repeat(${visibleItems.length > 4 ? 5 : visibleItems.length}, 1fr)` }}>
+          {visibleItems.slice(0, 4).map((item) => {
             const Icon = item.icon;
             const isActive = item.href === '/dashboard' 
               ? pathname === item.href 
@@ -93,51 +95,48 @@ export function MobileBottomNav() {
                 </button>
               </div>
               
-              {/* Additional Menu Items */}
-              <Link
-                href="/dashboard/recipes"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 active:bg-slate-200"
-              >
-                <ChefHat className="h-5 w-5 text-slate-600" />
-                <span className="text-sm font-medium">Recipes</span>
-              </Link>
+              {/* Additional Menu Items - Role Based */}
+              {user?.role === 'owner' || user?.role === 'manager' ? (
+                <>
+                  <Link
+                    href="/dashboard/recipes"
+                    onClick={() => setShowMenu(false)}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 active:bg-slate-200"
+                  >
+                    <ChefHat className="h-5 w-5 text-slate-600" />
+                    <span className="text-sm font-medium">Recipes</span>
+                  </Link>
+                  
+                  <Link
+                    href="/dashboard/expenses"
+                    onClick={() => setShowMenu(false)}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 active:bg-slate-200"
+                  >
+                    <DollarSign className="h-5 w-5 text-slate-600" />
+                    <span className="text-sm font-medium">Expenses</span>
+                  </Link>
+                  
+                  <Link
+                    href="/dashboard/sales"
+                    onClick={() => setShowMenu(false)}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 active:bg-slate-200"
+                  >
+                    <BarChart3 className="h-5 w-5 text-slate-600" />
+                    <span className="text-sm font-medium">Sales</span>
+                  </Link>
+                </>
+              ) : null}
               
-              <Link
-                href="/dashboard/inventory"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 active:bg-slate-200"
-              >
-                <BarChart3 className="h-5 w-5 text-slate-600" />
-                <span className="text-sm font-medium">Inventory</span>
-              </Link>
-              
-              <Link
-                href="/dashboard/khata"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 active:bg-slate-200"
-              >
-                <CreditCard className="h-5 w-5 text-slate-600" />
-                <span className="text-sm font-medium">Khata</span>
-              </Link>
-              
-              <Link
-                href="/dashboard/expenses"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 active:bg-slate-200"
-              >
-                <DollarSign className="h-5 w-5 text-slate-600" />
-                <span className="text-sm font-medium">Expenses</span>
-              </Link>
-              
-              <Link
-                href="/dashboard/analytics"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 active:bg-slate-200"
-              >
-                <BarChart3 className="h-5 w-5 text-slate-600" />
-                <span className="text-sm font-medium">Analytics</span>
-              </Link>
+              {user?.role === 'owner' || user?.role === 'manager' || user?.role === 'cashier' ? (
+                <Link
+                  href="/dashboard/khata"
+                  onClick={() => setShowMenu(false)}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 active:bg-slate-200"
+                >
+                  <CreditCard className="h-5 w-5 text-slate-600" />
+                  <span className="text-sm font-medium">Khata</span>
+                </Link>
+              ) : null}
             </div>
           </div>
         </>
