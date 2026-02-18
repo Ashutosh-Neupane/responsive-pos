@@ -155,14 +155,33 @@ export default function POSPage() {
     addItem(saleItem);
   }
 
-  // Calculate totals
+  // Calculate totals with VAT-inclusive pricing
   const items = currentSale?.items || [];
-  const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
-  const totalTax = items.reduce((sum, item) => sum + item.tax_amount, 0);
-  const itemDiscount = items.reduce((sum, item) => sum + item.discount_amount, 0);
-  const cartLevelDiscount = discountType === 'percentage' ? (subtotal * cartDiscount) / 100 : cartDiscount;
-  const totalDiscount = itemDiscount + cartLevelDiscount;
-  const totalAmount = subtotal + totalTax - totalDiscount;
+  
+  // Subtotal is sum of all item prices (VAT already included)
+  const subtotal = items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+  
+  // Calculate item-level discounts
+  const itemLevelDiscount = items.reduce((sum, item) => {
+    const discount = itemDiscounts[item.id];
+    if (!discount || discount.value === 0) return sum;
+    const itemSubtotal = item.unit_price * item.quantity;
+    return sum + (discount.type === 'percentage' ? (itemSubtotal * discount.value / 100) : discount.value);
+  }, 0);
+  
+  // Calculate cart-level discount on subtotal after item discounts
+  const subtotalAfterItemDiscount = subtotal - itemLevelDiscount;
+  const cartLevelDiscount = discountType === 'percentage' 
+    ? (subtotalAfterItemDiscount * cartDiscount / 100) 
+    : cartDiscount;
+  
+  const totalDiscount = itemLevelDiscount + cartLevelDiscount;
+  const netAmount = subtotal - totalDiscount;
+  
+  // Reverse calculate VAT from net amount (VAT is 13% of base, so price = base * 1.13)
+  // base = netAmount / 1.13, VAT = netAmount - base
+  const totalTax = netAmount - (netAmount / 1.13);
+  const totalAmount = netAmount;
 
   // Handle complete sale
   async function handleCompleteSale() {
@@ -580,7 +599,7 @@ export default function POSPage() {
 
         {/* Invoice Modal */}
         {showInvoice && completedSale && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowInvoice(false)}>
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
                 <h2 className="font-bold text-lg">Invoice</h2>

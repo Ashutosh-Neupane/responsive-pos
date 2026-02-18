@@ -17,12 +17,14 @@ import {
   Globe,
   ChefHat,
   UtensilsCrossed,
+  Receipt,
 } from 'lucide-react';
 import { LanguageSwitcher } from './language-switcher';
 
 const menuItems = [
   { href: '/dashboard', icon: Home, label: 'Dashboard', roles: ['owner', 'manager', 'cashier', 'staff'], categories: ['all'] },
   { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS', roles: ['owner', 'manager', 'cashier', 'staff'], categories: ['all'] },
+  { href: '/dashboard/sales', icon: Receipt, label: 'Sales', roles: ['owner', 'manager'], categories: ['all'] },
   { href: '/dashboard/products', icon: Package, label: 'Products', roles: ['owner', 'manager'], categories: ['all'] },
   { href: '/dashboard/recipes', icon: ChefHat, label: 'Recipes', roles: ['owner', 'manager'], categories: ['restaurant'] },
   { href: '/dashboard/inventory', icon: BarChart3, label: 'Inventory', roles: ['owner', 'manager'], categories: ['all'] },
