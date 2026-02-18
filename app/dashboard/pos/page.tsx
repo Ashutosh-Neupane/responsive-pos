@@ -179,16 +179,21 @@ export default function POSPage() {
     setIsProcessing(true);
 
     try {
+      // Generate IRD-compliant invoice number: INV-YYYY-NNNN
+      const year = new Date().getFullYear();
+      const invoiceCount = (useSalesStore.getState().sales.length + 1).toString().padStart(4, '0');
+      const invoiceNumber = `INV-${year}-${invoiceCount}`;
+      
       const sale: Sale = {
         id: uuidv4(),
         shop_id: shop.id,
-        sale_number: `SALE-${Date.now()}`,
+        sale_number: invoiceNumber,
         customer_id: selectedCustomer || undefined,
         table_number: selectedTable || undefined,
         items,
         subtotal,
         tax_amount: totalTax,
-        discount_amount: totalDiscount,
+        discount_amount: totalDiscount + cartDiscount,
         total_amount: totalAmount,
         payment_method: paymentMethod,
         payment_status: paymentMethod === 'credit' ? 'pending' : 'paid',
@@ -300,8 +305,17 @@ export default function POSPage() {
                     
                     return (
                     <div key={item.id} className="bg-slate-50 rounded p-1.5 border text-xs">
-                      {/* Main Row - One Line */}
-                      <div className="flex items-center gap-1">
+                      {/* Main Row - One Line with Image */}
+                      <div className="flex items-center gap-1.5">
+                        {/* Product Image */}
+                        <div className="w-10 h-10 rounded bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center flex-shrink-0">
+                          {product?.image_url ? (
+                            <img src={product.image_url} alt={item.product_name} className="w-full h-full object-cover rounded" />
+                          ) : (
+                            <span className="text-sm font-bold text-blue-600">{item.product_name.charAt(0)}</span>
+                          )}
+                        </div>
+                        
                         {/* Product Name & Variant Selector */}
                         <div className="flex-1 min-w-0">
                           {variants.length > 0 ? (
@@ -374,6 +388,12 @@ export default function POSPage() {
                       <span>Subtotal:</span>
                       <span className="font-semibold">Rs {subtotal.toFixed(0)}</span>
                     </div>
+                    {(totalDiscount > 0 || cartDiscount > 0) && (
+                      <div className="flex justify-between text-green-700">
+                        <span>Discount:</span>
+                        <span className="font-semibold">-Rs {(totalDiscount + cartDiscount).toFixed(0)}</span>
+                      </div>
+                    )}
                     {totalTax > 0 && (
                       <div className="flex justify-between">
                         <span>VAT (13%):</span>
@@ -383,6 +403,29 @@ export default function POSPage() {
                     <div className="flex justify-between font-bold text-base border-t pt-1">
                       <span>Total:</span>
                       <span className="text-blue-600">Rs {totalAmount.toFixed(0)}</span>
+                    </div>
+                  </div>
+
+                  {/* Total Discount Before VAT */}
+                  <div className="px-3 py-2 border-t bg-yellow-50">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-slate-700">Extra Discount:</span>
+                      <select
+                        value={discountType}
+                        onChange={(e) => setDiscountType(e.target.value as any)}
+                        className="text-xs border rounded px-1 py-0.5 w-12"
+                      >
+                        <option value="percentage">%</option>
+                        <option value="fixed">Rs</option>
+                      </select>
+                      <input
+                        type="number"
+                        min="0"
+                        value={cartDiscount}
+                        onChange={(e) => setCartDiscount(parseFloat(e.target.value) || 0)}
+                        className="text-xs border rounded px-2 py-0.5 w-16"
+                        placeholder="0"
+                      />
                     </div>
                   </div>
 
