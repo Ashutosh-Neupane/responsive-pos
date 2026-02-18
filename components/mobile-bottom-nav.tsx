@@ -39,8 +39,8 @@ export function MobileBottomNav() {
     <>
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 safe-area-bottom">
-        <div className="grid grid-cols-5 h-16">
-          {visibleItems.slice(0, 4).map((item) => {
+        <div className={`grid h-16 ${visibleItems.length <= 4 ? `grid-cols-${visibleItems.length}` : 'grid-cols-5'}`}>
+          {visibleItems.slice(0, visibleItems.length <= 4 ? 4 : 4).map((item) => {
             const Icon = item.icon;
             const isActive = item.href === '/dashboard' 
               ? pathname === item.href 
@@ -62,16 +62,18 @@ export function MobileBottomNav() {
             );
           })}
           
-          {/* More Menu */}
-          <button
-            onClick={() => setShowMenu(!showMenu)}
-            className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-              showMenu ? 'text-blue-600 bg-blue-50' : 'text-slate-600 active:bg-slate-100'
-            }`}
-          >
-            <Menu className={`h-5 w-5 ${showMenu ? 'stroke-[2.5]' : ''}`} />
-            <span className="text-xs font-medium">More</span>
-          </button>
+          {/* More Menu - Only show if more than 4 items */}
+          {visibleItems.length > 4 && (
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+                showMenu ? 'text-blue-600 bg-blue-50' : 'text-slate-600 active:bg-slate-100'
+              }`}
+            >
+              <Menu className={`h-5 w-5 ${showMenu ? 'stroke-[2.5]' : ''}`} />
+              <span className="text-xs font-medium">More</span>
+            </button>
+          )}
         </div>
       </nav>
 

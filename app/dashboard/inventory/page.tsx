@@ -116,8 +116,8 @@ export default function InventoryPage() {
     <div className="flex h-screen bg-slate-50">
       <Sidebar />
 
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <main className="flex-1 overflow-auto pb-16 md:pb-0">
+        <div className="p-2 sm:p-4 md:p-6 max-w-6xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
@@ -127,38 +127,38 @@ export default function InventoryPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Total Items</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{inventory.length}</div>
-                <p className="text-xs text-slate-600">In inventory</p>
+                <div className="text-xl sm:text-2xl font-bold">{inventory.length}</div>
+                <p className="text-[10px] sm:text-xs text-slate-600">In inventory</p>
               </CardContent>
             </Card>
 
             <Card className={lowStockItems.length > 0 ? 'border-yellow-200 bg-yellow-50' : ''}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Low Stock</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Low Stock</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${lowStockItems.length > 0 ? 'text-yellow-700' : ''}`}>
+                <div className={`text-xl sm:text-2xl font-bold ${lowStockItems.length > 0 ? 'text-yellow-700' : ''}`}>
                   {lowStockItems.length}
                 </div>
-                <p className="text-xs text-slate-600">Below reorder level</p>
+                <p className="text-[10px] sm:text-xs text-slate-600">Below reorder</p>
               </CardContent>
             </Card>
 
             <Card className={outOfStockItems.length > 0 ? 'border-red-200 bg-red-50' : ''}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Out of Stock</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs sm:text-sm font-medium">Out of Stock</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${outOfStockItems.length > 0 ? 'text-red-700' : ''}`}>
+                <div className={`text-xl sm:text-2xl font-bold ${outOfStockItems.length > 0 ? 'text-red-700' : ''}`}>
                   {outOfStockItems.length}
                 </div>
-                <p className="text-xs text-slate-600">Zero quantity</p>
+                <p className="text-[10px] sm:text-xs text-slate-600">Zero quantity</p>
               </CardContent>
             </Card>
           </div>
@@ -295,42 +295,36 @@ export default function InventoryPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-100">
-                    <th className="text-left px-4 py-3 font-medium text-slate-700">Product</th>
-                    <th className="text-left px-4 py-3 font-medium text-slate-700">SKU</th>
-                    <th className="text-right px-4 py-3 font-medium text-slate-700">Current Stock</th>
-                    <th className="text-right px-4 py-3 font-medium text-slate-700">Reorder Level</th>
-                    <th className="text-center px-4 py-3 font-medium text-slate-700">Status</th>
-                    <th className="text-center px-4 py-3 font-medium text-slate-700">Last Updated</th>
-                    <th className="text-center px-4 py-3 font-medium text-slate-700">Action</th>
+                    <th className="text-left px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-slate-700">Product</th>
+                    <th className="text-right px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-slate-700">Stock</th>
+                    <th className="text-right px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-slate-700 hidden sm:table-cell">Reorder</th>
+                    <th className="text-center px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-slate-700">Status</th>
+                    <th className="text-center px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium text-slate-700">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredInventory.map((item) => {
                     const isLowStock = item.quantity <= item.reorder_level && item.quantity > 0;
                     const isOutOfStock = item.quantity === 0;
-                    const status = isOutOfStock ? 'Out of Stock' : isLowStock ? 'Low Stock' : 'In Stock';
+                    const status = isOutOfStock ? 'Out' : isLowStock ? 'Low' : 'OK';
                     const statusColor = isOutOfStock ? 'bg-red-100 text-red-700' : isLowStock ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700';
 
                     return (
                       <tr key={item.id} className="border-b border-slate-200 hover:bg-slate-50">
-                        <td className="px-4 py-3 font-medium">{getProductName(item.product_id)}</td>
-                        <td className="px-4 py-3 text-slate-600 text-sm">{getProductSku(item.product_id)}</td>
-                        <td className="px-4 py-3 text-right font-semibold">{item.quantity}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{item.reorder_level}</td>
-                        <td className="px-4 py-3 text-center">
-                          <span className={`text-xs font-semibold px-3 py-1 rounded-full ${statusColor}`}>
+                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium">{getProductName(item.product_id)}</td>
+                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-sm sm:text-base font-semibold">{item.quantity}</td>
+                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-slate-600 hidden sm:table-cell">{item.reorder_level}</td>
+                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                          <span className={`text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full ${statusColor}`}>
                             {status}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-center text-sm text-slate-600">
-                          {new Date(item.last_count_date).toLocaleDateString()}
-                        </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleEdit(item)}
-                            className="text-blue-600 hover:text-blue-700"
+                            className="text-blue-600 hover:text-blue-700 h-7 px-2 text-xs"
                           >
                             <Edit2 className="h-3 w-3" />
                           </Button>

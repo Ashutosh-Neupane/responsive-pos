@@ -277,7 +277,7 @@ export default function POSPage() {
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">
           {/* Products Grid */}
-          <div className="flex-1 overflow-y-auto p-2 md:p-4">
+          <div className="flex-1 overflow-y-auto p-2 md:p-4 pb-20 md:pb-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {(searchQuery ? searchResults : posProducts.slice(0, 100)).map((product) => {
                 const stock = getStock(product.id);
@@ -288,11 +288,15 @@ export default function POSPage() {
                     onClick={() => !isOutOfStock && handleAddProduct(product.id)}
                     className={`bg-white rounded-lg border p-2 cursor-pointer hover:shadow-md transition ${isOutOfStock ? 'opacity-50' : ''}`}
                   >
-                    <div className="aspect-square bg-gradient-to-br from-blue-100 to-blue-50 rounded flex items-center justify-center mb-2">
-                      <span className="text-2xl font-bold text-blue-600">{product.name.charAt(0)}</span>
+                    <div className="aspect-square bg-gradient-to-br from-blue-100 to-blue-50 rounded flex items-center justify-center mb-1.5">
+                      {product.image_url ? (
+                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover rounded" />
+                      ) : (
+                        <span className="text-xl sm:text-2xl font-bold text-blue-600">{product.name.charAt(0)}</span>
+                      )}
                     </div>
                     <p className="font-semibold text-xs line-clamp-2 mb-1">{product.name}</p>
-                    <p className="text-xs text-slate-500 mb-1">{isOutOfStock ? 'Out' : `Stock: ${stock}`}</p>
+                    <p className="text-[10px] text-slate-500 mb-1">{isOutOfStock ? 'Out' : `Stock: ${stock}`}</p>
                     <p className="font-bold text-sm">Rs {product.selling_price.toFixed(0)}</p>
                   </div>
                 );
@@ -300,8 +304,8 @@ export default function POSPage() {
             </div>
           </div>
 
-          {/* Cart Sidebar - Full Height */}
-          <div className="w-80 lg:w-96 bg-white border-l flex flex-col h-full">
+          {/* Cart Sidebar - Desktop Only */}
+          <div className="hidden lg:flex w-80 lg:w-96 bg-white border-l flex-col h-full">
             {/* Cart Header */}
             <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
               <h2 className="font-bold">Cart ({items.length})</h2>
@@ -522,7 +526,7 @@ export default function POSPage() {
         {items.length > 0 && (
           <button
             onClick={() => setShowCart(true)}
-            className="md:hidden fixed bottom-20 right-4 z-50 bg-blue-600 text-white rounded-full p-4 shadow-xl"
+            className="lg:hidden fixed bottom-20 right-4 z-50 bg-blue-600 text-white rounded-full p-4 shadow-xl"
           >
             <ShoppingCart className="h-6 w-6" />
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
@@ -531,10 +535,10 @@ export default function POSPage() {
           </button>
         )}
 
-        {/* Mobile Cart Modal */}
+        {/* Mobile Cart Bottom Sheet */}
         {showCart && (
-          <div className="md:hidden fixed inset-0 bg-black/50 z-50" onClick={() => setShowCart(false)}>
-            <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="lg:hidden fixed inset-0 bg-black/50 z-50 flex items-end" onClick={() => setShowCart(false)}>
+            <div className="w-full bg-white rounded-t-2xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
               <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between rounded-t-2xl">
                 <h2 className="font-bold">Cart ({items.length})</h2>
                 <button onClick={() => setShowCart(false)}>

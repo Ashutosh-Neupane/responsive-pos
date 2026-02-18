@@ -31,8 +31,8 @@ export default function SalesPage() {
       <div className="flex h-screen bg-slate-50">
         <Sidebar />
 
-        <main className="flex-1 overflow-auto">
-          <div className="p-6 max-w-6xl mx-auto space-y-6">
+        <main className="flex-1 overflow-auto pb-16 md:pb-0">
+          <div className="p-2 sm:p-4 md:p-6 max-w-6xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
             {/* Header */}
             <div>
               <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">

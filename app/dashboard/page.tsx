@@ -66,13 +66,13 @@ export default function DashboardPage() {
     <div className="flex h-screen bg-slate-50">
       <Sidebar />
       
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <main className="flex-1 overflow-auto pb-16 md:pb-0">
+        <div className="p-2 sm:p-4 md:p-6 max-w-7xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-              <p className="text-sm text-slate-600">Welcome back, {user?.name}</p>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900">Dashboard</h1>
+              <p className="text-xs sm:text-sm text-slate-600">Welcome back, {user?.name}</p>
             </div>
           </div>
 
@@ -105,64 +105,64 @@ export default function DashboardPage() {
           </div>
 
           {/* Stats Grid - All in one line */}
-          <div className="grid grid-cols-5 gap-2 md:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
             {/* Today's Sales */}
-            <Card className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-600">Sales</p>
-                  <p className="text-2xl font-bold text-blue-900 mt-1">Rs {(stats.todaySales / 1000).toFixed(0)}k</p>
-                  <p className="text-xs text-slate-600 mt-1">{stats.totalTransactions} tx</p>
+            <Card className="p-2 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[10px] sm:text-xs font-medium text-slate-600">Sales</p>
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                 </div>
-                <TrendingUp className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-blue-900 truncate">Rs {(stats.todaySales / 1000).toFixed(0)}k</p>
+                <p className="text-[10px] sm:text-xs text-slate-600">{stats.totalTransactions} tx</p>
               </div>
             </Card>
 
             {/* Total Customers */}
-            <Card className="p-3 bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-600">Customers</p>
-                  <p className="text-2xl font-bold text-green-900 mt-1">{stats.totalCustomers}</p>
-                  <p className="text-xs text-slate-600 mt-1">Total</p>
+            <Card className="p-2 bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[10px] sm:text-xs font-medium text-slate-600">Customers</p>
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                 </div>
-                <Users className="h-5 w-5 text-green-600 flex-shrink-0" />
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-green-900">{stats.totalCustomers}</p>
+                <p className="text-[10px] sm:text-xs text-slate-600">Total</p>
               </div>
             </Card>
 
             {/* Outstanding Khata */}
-            <Card className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-600">Khata Due</p>
-                  <p className="text-2xl font-bold text-purple-900 mt-1">Rs {(stats.outstandingCredit / 1000).toFixed(0)}k</p>
-                  <p className="text-xs text-slate-600 mt-1">Pending</p>
+            <Card className="p-2 bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Khata Due</p>
+                  <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
                 </div>
-                <DollarSign className="h-5 w-5 text-purple-600 flex-shrink-0" />
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-purple-900 truncate">Rs {(stats.outstandingCredit / 1000).toFixed(0)}k</p>
+                <p className="text-[10px] sm:text-xs text-slate-600">Pending</p>
               </div>
             </Card>
 
             {/* Low Stock Items */}
-            <Card className={`p-3 ${stats.lowStockItems > 0 ? 'bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200' : 'bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200'}`}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-600">Low Stock</p>
-                  <p className={`text-2xl font-bold mt-1 ${stats.lowStockItems > 0 ? 'text-orange-900' : 'text-slate-900'}`}>{stats.lowStockItems}</p>
-                  <p className="text-xs text-slate-600 mt-1">Items</p>
+            <Card className={`p-2 ${stats.lowStockItems > 0 ? 'bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200' : 'bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200'}`}>
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Low Stock</p>
+                  <Package className={`h-3 w-3 sm:h-4 sm:w-4 ${stats.lowStockItems > 0 ? 'text-orange-600' : 'text-slate-600'}`} />
                 </div>
-                <Package className={`h-5 w-5 flex-shrink-0 ${stats.lowStockItems > 0 ? 'text-orange-600' : 'text-slate-600'}`} />
+                <p className={`text-lg sm:text-xl md:text-2xl font-bold ${stats.lowStockItems > 0 ? 'text-orange-900' : 'text-slate-900'}`}>{stats.lowStockItems}</p>
+                <p className="text-[10px] sm:text-xs text-slate-600">Items</p>
               </div>
             </Card>
 
             {/* Today's Expenses */}
-            <Card className="p-3 bg-gradient-to-br from-red-50 to-red-100 border border-red-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-600">Expenses</p>
-                  <p className="text-2xl font-bold text-red-900 mt-1">Rs {getTotalExpensesToday() > 0 ? (getTotalExpensesToday() / 1000).toFixed(0) + 'k' : '0'}</p>
-                  <p className="text-xs text-slate-600 mt-1">Today</p>
+            <Card className="p-2 bg-gradient-to-br from-red-50 to-red-100 border border-red-200">
+              <div className="flex flex-col">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[10px] sm:text-xs font-medium text-slate-600">Expenses</p>
+                  <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
                 </div>
-                <DollarSign className="h-5 w-5 text-red-600 flex-shrink-0" />
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-900 truncate">Rs {getTotalExpensesToday() > 0 ? (getTotalExpensesToday() / 1000).toFixed(0) + 'k' : '0'}</p>
+                <p className="text-[10px] sm:text-xs text-slate-600">Today</p>
               </div>
             </Card>
           </div>
