@@ -15,6 +15,15 @@ export default function SalesPage() {
   const { isAuthenticated, user, shop } = useAuthStore();
   const { sales } = useSalesStore();
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+  const [invoiceSize, setInvoiceSize] = useState<'thermal' | 'a5' | 'a4'>('a4');
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+
+  // Auto-select invoice size based on total amount
+  const getDefaultInvoiceSize = (total: number): 'thermal' | 'a5' | 'a4' => {
+    if (total < 5000) return 'thermal'; // Small receipt for under Rs 5,000
+    if (total < 20000) return 'a5'; // Medium invoice for Rs 5,000-20,000
+    return 'a4'; // Full invoice for Rs 20,000+
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -116,7 +125,10 @@ export default function SalesPage() {
                         </div>
                         <Button 
                           size="sm" 
-                          onClick={() => setSelectedSale(sale)}
+                          onClick={() => {
+                            setSelectedSale(sale);
+                            setInvoiceSize(getDefaultInvoiceSize(sale.total_amount));
+                          }}
                           className="bg-blue-600 hover:bg-blue-700"
                         >
                           <Eye className="h-3 w-3 mr-1" />
@@ -153,7 +165,9 @@ export default function SalesPage() {
           <>
             <style jsx global>{`
               @media print {
-                @page { size: A4; margin: 10mm; }
+                @page.thermal { size: 80mm auto; margin: 5mm; }
+                @page.a5 { size: A5; margin: 10mm; }
+                @page.a4 { size: A4; margin: 10mm; }
                 body * { visibility: hidden; }
                 #invoice-print, #invoice-print * { visibility: visible; }
                 #invoice-print { 
@@ -161,24 +175,50 @@ export default function SalesPage() {
                   left: 0; 
                   top: 0; 
                   width: 100%; 
-                  max-width: 210mm;
                   margin: 0;
-                  padding: 20px;
                 }
+                #invoice-print.thermal { max-width: 80mm; padding: 10px; font-size: 11px; }
+                #invoice-print.a5 { max-width: 148mm; padding: 15px; font-size: 12px; }
+                #invoice-print.a4 { max-width: 210mm; padding: 20px; font-size: 14px; }
                 .print-hide { display: none !important; }
                 .invoice-header-row { display: flex !important; }
               }
             `}</style>
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
               <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between print-hide">
+                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between print-hide z-10">
                   <h2 className="font-bold text-lg">Invoice Preview</h2>
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      size="sm" 
+                      onClick={() => setShowPrintDialog(true)} 
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Printer className="h-4 w-4 mr-2" />
+                      Print
+                    </Button>
+                    <button onClick={() => setSelectedSale(null)} className="text-slate-600 hover:text-slate-900">
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>>
+                      <select 
+                        value={invoiceSize} 
+                        onChange={(e) => setInvoiceSize(e.target.value as any)}
+                        className="text-sm border border-slate-300 rounded px-2 py-1"
+                      >
+                        <option value="thermal">Thermal (80mm) - Small</option>
+                        <option value="a5">A5 - Medium</option>
+                        <option value="a4">A4 - Full</option>
+                      </select>
+                    </div>
+                  </div>
                   <button onClick={() => setSelectedSale(null)} className="text-slate-600 hover:text-slate-900">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
                 
-                <div id="invoice-print" className="p-8">
+                <div id="invoice-print" className={`${invoiceSize === 'thermal' ? 'p-4 text-xs' : invoiceSize === 'a5' ? 'p-6 text-sm' : 'p-8'} ${invoiceSize}`}>
                   {/* Invoice Header Row - Invoice & Print */}
                   <div className="invoice-header-row flex items-center justify-between mb-6 pb-3 border-b-2 border-black">
                     <div>
@@ -276,6 +316,55 @@ export default function SalesPage() {
                 </div>
               </div>
             </div>
+
+            {/* Print Dialog */}
+            {showPrintDialog && selectedSale && (
+              <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg max-w-md w-full p-6">
+                  <h3 className="text-xl font-bold mb-4">Print Invoice</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Select Invoice Size:
+                      </label>
+                      <select 
+                        value={invoiceSize} 
+                        onChange={(e) => setInvoiceSize(e.target.value as any)}
+                        className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="thermal">Thermal (80mm) - Small Receipt</option>
+                        <option value="a5">A5 (148mm) - Medium Invoice</option>
+                        <option value="a4">A4 (210mm) - Full Invoice</option>
+                      </select>
+                      <p className="text-xs text-slate-500 mt-2">
+                        {invoiceSize === 'thermal' && 'Best for small transactions under Rs 5,000'}
+                        {invoiceSize === 'a5' && 'Best for medium transactions Rs 5,000-20,000'}
+                        {invoiceSize === 'a4' && 'Best for large transactions over Rs 20,000'}
+                      </p>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <Button 
+                        onClick={() => {
+                          setShowPrintDialog(false);
+                          setTimeout(() => window.print(), 100);
+                        }}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Printer className="h-4 w-4 mr-2" />
+                        Print Now
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => setShowPrintDialog(false)}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
