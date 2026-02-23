@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/sidebar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuthStore, useSalesStore } from '@/lib/store';
 import { Receipt, Calendar, DollarSign, Eye, Printer, X } from 'lucide-react';
@@ -12,17 +12,16 @@ import type { Sale } from '@/lib/types';
 
 export default function SalesPage() {
   const router = useRouter();
-  const { isAuthenticated, user, shop } = useAuthStore();
+  const { isAuthenticated, shop } = useAuthStore();
   const { sales } = useSalesStore();
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
   const [invoiceSize, setInvoiceSize] = useState<'thermal' | 'a5' | 'a4'>('a4');
   const [showPrintDialog, setShowPrintDialog] = useState(false);
 
-  // Auto-select invoice size based on total amount
   const getDefaultInvoiceSize = (total: number): 'thermal' | 'a5' | 'a4' => {
-    if (total < 5000) return 'thermal'; // Small receipt for under Rs 5,000
-    if (total < 20000) return 'a5'; // Medium invoice for Rs 5,000-20,000
-    return 'a4'; // Full invoice for Rs 20,000+
+    if (total < 5000) return 'thermal';
+    if (total < 20000) return 'a5';
+    return 'a4';
   };
 
   useEffect(() => {
@@ -33,7 +32,6 @@ export default function SalesPage() {
 
   if (!isAuthenticated) return null;
 
-  // Sort sales by date (newest first)
   const sortedSales = [...sales].sort((a, b) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
@@ -45,7 +43,6 @@ export default function SalesPage() {
 
         <main className="flex-1 overflow-auto pb-16 md:pb-0">
           <div className="p-2 sm:p-4 md:p-6 max-w-6xl mx-auto space-y-3 sm:space-y-4 md:space-y-6">
-            {/* Header */}
             <div>
               <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
                 <Receipt className="h-8 w-8" />
@@ -54,7 +51,6 @@ export default function SalesPage() {
               <p className="text-slate-600">View all sales transactions</p>
             </div>
 
-            {/* Sales List */}
             <div className="space-y-3">
               {sortedSales.length === 0 ? (
                 <Card>
@@ -68,7 +64,6 @@ export default function SalesPage() {
                   <Card key={sale.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between gap-4">
-                        {/* Left: Invoice Info */}
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <Receipt className="h-5 w-5 text-blue-600" />
@@ -105,39 +100,36 @@ export default function SalesPage() {
                           </div>
                         </div>
 
-                        {/* Right: Amounts & Actions */}
                         <div className="flex flex-col items-end gap-2">
-                        <div className="text-right space-y-1">
-                          {sale.discount_amount > 0 && (
-                            <div className="text-sm text-green-700">
-                              Discount: -Rs {sale.discount_amount.toFixed(2)}
+                          <div className="text-right space-y-1">
+                            {sale.discount_amount > 0 && (
+                              <div className="text-sm text-green-700">
+                                Discount: -Rs {sale.discount_amount.toFixed(2)}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 justify-end">
+                              <span className="text-2xl font-bold text-blue-600">
+                                Rs {sale.total_amount.toFixed(2)}
+                              </span>
                             </div>
-                          )}
-                          <div className="flex items-center gap-2 justify-end">
-                            <DollarSign className="h-5 w-5 text-slate-600" />
-                            <span className="text-2xl font-bold text-blue-600">
-                              Rs {sale.total_amount.toFixed(2)}
-                            </span>
+                            <div className="text-xs text-slate-500">
+                              (incl. VAT Rs {sale.tax_amount.toFixed(2)})
+                            </div>
                           </div>
-                          <div className="text-xs text-slate-500">
-                            (incl. VAT Rs {sale.tax_amount.toFixed(2)})
-                          </div>
-                        </div>
-                        <Button 
-                          size="sm" 
-                          onClick={() => {
-                            setSelectedSale(sale);
-                            setInvoiceSize(getDefaultInvoiceSize(sale.total_amount));
-                          }}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          View Invoice
-                        </Button>
+                          <Button 
+                            size="sm" 
+                            onClick={() => {
+                              setSelectedSale(sale);
+                              setInvoiceSize(getDefaultInvoiceSize(sale.total_amount));
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            View Invoice
+                          </Button>
                         </div>
                       </div>
 
-                      {/* Items Summary */}
                       <div className="mt-3 pt-3 border-t">
                         <div className="flex flex-wrap gap-2">
                           {sale.items.slice(0, 3).map((item, idx) => (
@@ -160,7 +152,6 @@ export default function SalesPage() {
           </div>
         </main>
 
-        {/* Invoice Modal */}
         {selectedSale && (
           <>
             <style jsx global>{`
@@ -177,7 +168,14 @@ export default function SalesPage() {
                   width: 100%; 
                   margin: 0;
                 }
-                #invoice-print.thermal { max-width: 80mm; padding: 10px; font-size: 11px; }
+                #invoice-print.thermal { max-width: 80mm; padding: 8px; font-size: 10px; }
+                #invoice-print.thermal .text-2xl { font-size: 14px; }
+                #invoice-print.thermal .text-lg { font-size: 12px; }
+                #invoice-print.thermal .text-base { font-size: 11px; }
+                #invoice-print.thermal .text-sm { font-size: 10px; }
+                #invoice-print.thermal .gap-8 { gap: 1rem; }
+                #invoice-print.thermal .mb-6 { margin-bottom: 0.75rem; }
+                #invoice-print.thermal .pb-3 { padding-bottom: 0.5rem; }
                 #invoice-print.a5 { max-width: 148mm; padding: 15px; font-size: 12px; }
                 #invoice-print.a4 { max-width: 210mm; padding: 20px; font-size: 14px; }
                 .print-hide { display: none !important; }
@@ -201,25 +199,9 @@ export default function SalesPage() {
                       <X className="h-5 w-5" />
                     </button>
                   </div>
-                </div>>
-                      <select 
-                        value={invoiceSize} 
-                        onChange={(e) => setInvoiceSize(e.target.value as any)}
-                        className="text-sm border border-slate-300 rounded px-2 py-1"
-                      >
-                        <option value="thermal">Thermal (80mm) - Small</option>
-                        <option value="a5">A5 - Medium</option>
-                        <option value="a4">A4 - Full</option>
-                      </select>
-                    </div>
-                  </div>
-                  <button onClick={() => setSelectedSale(null)} className="text-slate-600 hover:text-slate-900">
-                    <X className="h-5 w-5" />
-                  </button>
                 </div>
                 
-                <div id="invoice-print" className={`${invoiceSize === 'thermal' ? 'p-4 text-xs' : invoiceSize === 'a5' ? 'p-6 text-sm' : 'p-8'} ${invoiceSize}`}>
-                  {/* Invoice Header Row - Invoice & Print */}
+                <div id="invoice-print" className={`${invoiceSize === 'thermal' ? 'p-3 text-xs' : invoiceSize === 'a5' ? 'p-6 text-sm' : 'p-8'} ${invoiceSize}`}>
                   <div className="invoice-header-row flex items-center justify-between mb-6 pb-3 border-b-2 border-black">
                     <div>
                       <h2 className="text-2xl font-bold">INVOICE</h2>
@@ -227,14 +209,14 @@ export default function SalesPage() {
                     </div>
                     <Button 
                       size="sm" 
-                      onClick={() => window.print()} 
+                      onClick={() => setShowPrintDialog(true)} 
                       className="bg-blue-600 hover:bg-blue-700 print-hide"
                     >
                       <Printer className="h-4 w-4 mr-2" />
                       Print
                     </Button>
                   </div>
-                  {/* Business Details */}
+
                   <div className="grid grid-cols-2 gap-8 mb-6">
                     <div>
                       <h3 className="font-bold text-lg mb-2">From:</h3>
@@ -258,7 +240,6 @@ export default function SalesPage() {
                     </div>
                   </div>
 
-                  {/* Items Table */}
                   <div className="mb-6">
                     <table className="w-full border-collapse">
                       <thead>
@@ -282,7 +263,6 @@ export default function SalesPage() {
                     </table>
                   </div>
 
-                  {/* Totals */}
                   <div className="flex justify-end mb-6">
                     <div className="w-64 space-y-2">
                       <div className="flex justify-between text-sm">
@@ -306,7 +286,6 @@ export default function SalesPage() {
                     </div>
                   </div>
 
-                  {/* Footer */}
                   <div className="text-center text-sm border-t border-slate-300 pt-4 space-y-1">
                     <p className="font-semibold">Thank you for your business!</p>
                     {shop?.ird_registered && (
@@ -317,8 +296,7 @@ export default function SalesPage() {
               </div>
             </div>
 
-            {/* Print Dialog */}
-            {showPrintDialog && selectedSale && (
+            {showPrintDialog && (
               <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg max-w-md w-full p-6">
                   <h3 className="text-xl font-bold mb-4">Print Invoice</h3>
