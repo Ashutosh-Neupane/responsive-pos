@@ -39,159 +39,111 @@ export function ProductCard({
     product.reorder_level !== undefined && 
     product.stock_quantity <= product.reorder_level;
 
-  // Calculate final price after discounts
   const finalPrice = product.selling_price - 
     (product.discount_percentage ? (product.selling_price * product.discount_percentage / 100) : 0) - 
     (product.discount_amount || 0);
 
+  const formatPrice = (price?: number) => {
+    if (price === undefined || price === null || price === 0) return '';
+    const formatted = price.toFixed(2);
+    return formatted.endsWith('.00') ? formatted.slice(0, -3) : formatted;
+  };
+
   return (
-    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden hover:shadow-lg hover:border-blue-300 transition-all flex flex-col h-full">
-      {/* Product Image */}
-      <div className="relative w-full aspect-square bg-linear-to-br from-slate-50 to-slate-100 overflow-hidden">
+    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden hover:shadow-lg hover:border-blue-300 transition-all flex flex-col">
+      {/* Product Image - Full Width */}
+      <div className="relative w-full aspect-square bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
         {product.image_url ? (
-          <Image
-            src={product.image_url}
-            alt={product.name}
-            fill
-            className="object-cover"
-          />
+          <Image src={product.image_url} alt={product.name} fill className="object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Package className="h-16 w-16 text-slate-300" />
           </div>
         )}
         {isLowStock && (
-          <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full flex items-center gap-1 text-xs font-semibold">
+          <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full flex items-center gap-1 text-xs font-semibold shadow-lg">
             <AlertCircle className="h-3 w-3" />
-            Low Stock
+            Low
           </div>
         )}
       </div>
 
       {/* Product Details */}
-      <div className="p-4 flex-1 flex flex-col">
-        {/* Product Name */}
-        <h3 className="font-bold text-slate-900 text-base mb-2 line-clamp-2 min-h-12">
+      <div className="p-3 flex-1 flex flex-col">
+        {/* Name */}
+        <h3 className="font-bold text-slate-900 text-sm line-clamp-2 mb-1 min-h-[2.5rem]">
           {product.name}
         </h3>
-
+        
         {/* SKU */}
-        <p className="text-xs text-slate-500 font-mono mb-3">{product.sku}</p>
-
-        {/* Badges */}
-        <div className="flex gap-2 mb-3 flex-wrap">
+        <p className="text-xs text-slate-500 font-mono mb-2">{product.sku}</p>
+        
+        {/* Stock & Variants */}
+        <div className="flex gap-1.5 items-center flex-wrap mb-2">
           {product.stock_quantity !== undefined && (
-            <Badge 
-              variant={isLowStock ? 'destructive' : 'secondary'}
-              className="text-xs font-semibold"
-            >
-              Stock: {product.stock_quantity} {product.unit}
+            <Badge variant={isLowStock ? 'destructive' : 'secondary'} className="text-xs px-1.5 py-0">
+              Stock: {product.stock_quantity}
             </Badge>
           )}
           {product.is_parent_product && variants.length > 0 && (
-            <Badge variant="outline" className="text-xs font-semibold border-blue-300 text-blue-700">
+            <Badge variant="outline" className="text-xs px-1.5 py-0 border-blue-300 text-blue-700">
               {variants.length} Variant{variants.length !== 1 ? 's' : ''}
             </Badge>
           )}
         </div>
 
-        {/* Pricing */}
-        <div className="mt-auto">
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-bold text-blue-600">
-              Rs {finalPrice.toFixed(0)}
-            </span>
-            {(product.discount_percentage || product.discount_amount) && (
-              <span className="line-through text-slate-400 text-sm">
-                Rs {product.selling_price.toFixed(0)}
-              </span>
-            )}
-          </div>
+        {/* Cost & Selling Price */}
+        <div className="flex items-center gap-2 text-xs flex-wrap mt-auto">
+          {product.cost_price > 0 && (
+            <>
+              <span className="text-slate-500">Cost:</span>
+              <span className="font-semibold text-slate-700">Rs {formatPrice(product.cost_price)}</span>
+              <span className="text-slate-300">|</span>
+            </>
+          )}
+          <span className="text-slate-500">Sale:</span>
+          <span className="font-bold text-blue-600 text-sm">Rs {formatPrice(finalPrice)}</span>
           {(product.discount_percentage || product.discount_amount) && (
-            <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 font-semibold">
-              {product.discount_percentage ? `${product.discount_percentage}% OFF` : `Rs ${product.discount_amount} OFF`}
+            <Badge className="text-xs bg-green-100 text-green-700 px-1.5 py-0">
+              {product.discount_percentage ? `${product.discount_percentage}% OFF` : `Rs ${formatPrice(product.discount_amount)} OFF`}
             </Badge>
           )}
         </div>
       </div>
 
-      {/* Actions Footer */}
-      <div className="border-t border-slate-200 bg-slate-50">
-        <div className="grid grid-cols-2 gap-1 p-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onEdit?.(product)}
-            className="h-9 text-xs font-medium hover:bg-blue-50 hover:text-blue-700"
-          >
-            <Edit className="h-3.5 w-3.5 mr-1.5" />
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => onDelete?.(product.id)}
-            className="h-9 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-            Delete
-          </Button>
-        </div>
-        <div className="grid grid-cols-2 gap-1 px-2 pb-2">
-          {product.is_parent_product ? (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onCreateVariant?.(product)}
-              className="h-9 text-xs font-medium text-green-600 hover:text-green-700 hover:bg-green-50"
-            >
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              Add Variant
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onDuplicate?.(product)}
-              className="h-9 text-xs font-medium hover:bg-slate-100"
-            >
-              <Copy className="h-3.5 w-3.5 mr-1.5" />
-              Duplicate
-            </Button>
-          )}
-          {product.is_parent_product && variants.length > 0 && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setShowVariants(!showVariants);
-                onViewVariants?.(product.id);
-              }}
-              className="h-9 text-xs font-medium hover:bg-slate-100"
-            >
-              <ChevronDown className={`h-3.5 w-3.5 mr-1.5 transition-transform ${showVariants ? 'rotate-180' : ''}`} />
-              {showVariants ? 'Hide' : 'View'}
-            </Button>
-          )}
-        </div>
+      {/* Actions */}
+      <div className="grid grid-cols-4 border-t border-slate-200 bg-slate-50">
+        <button onClick={() => onEdit?.(product)} className="flex items-center justify-center py-2.5 hover:bg-blue-50 hover:text-blue-700 transition text-slate-600">
+          <Edit className="h-4 w-4" />
+        </button>
+        <button onClick={() => onDuplicate?.(product)} className="flex items-center justify-center py-2.5 hover:bg-slate-100 transition text-slate-600">
+          <Copy className="h-4 w-4" />
+        </button>
+        {product.is_parent_product && (
+          <button onClick={() => onCreateVariant?.(product)} className="flex items-center justify-center py-2.5 hover:bg-green-50 hover:text-green-700 transition text-slate-600">
+            <Plus className="h-4 w-4" />
+          </button>
+        )}
+        {product.is_parent_product && variants.length > 0 && (
+          <button onClick={() => { setShowVariants(!showVariants); onViewVariants?.(product.id); }} className="flex items-center justify-center py-2.5 hover:bg-slate-100 transition text-slate-600">
+            <ChevronDown className={`h-4 w-4 transition-transform ${showVariants ? 'rotate-180' : ''}`} />
+          </button>
+        )}
+        <button onClick={() => onDelete?.(product.id)} className="flex items-center justify-center py-2.5 text-red-600 hover:bg-red-50 transition">
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
 
-      {/* Variants List */}
+      {/* Variants */}
       {showVariants && variants.length > 0 && (
-        <div className="border-t border-slate-200 p-3 bg-slate-50 space-y-2 max-h-60 overflow-y-auto">
-          <p className="text-xs font-semibold text-slate-600 uppercase mb-2">Variants ({variants.length})</p>
+        <div className="border-t border-slate-200 p-3 bg-slate-50 space-y-2 max-h-48 overflow-y-auto">
           {variants.map((variant) => (
-            <div key={variant.id} className="text-sm p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors">
-              <div className="flex justify-between items-start gap-2">
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 text-sm truncate">{variant.name}</p>
-                  <p className="text-xs text-slate-500 font-mono mt-1">{variant.sku}</p>
-                  {variant.stock_quantity !== undefined && (
-                    <p className="text-xs text-slate-600 mt-1">Stock: {variant.stock_quantity} {variant.unit}</p>
-                  )}
-                </div>
-                <p className="font-bold text-blue-600 text-sm whitespace-nowrap">Rs {variant.selling_price.toFixed(0)}</p>
+            <div key={variant.id} className="bg-white p-2 rounded border border-slate-200 flex justify-between items-center">
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-slate-900 text-xs truncate">{variant.name}</p>
+                <p className="text-xs text-slate-500 font-mono">{variant.sku}</p>
               </div>
+              <span className="font-bold text-blue-600 text-sm ml-2">Rs {formatPrice(variant.selling_price)}</span>
             </div>
           ))}
         </div>
