@@ -18,8 +18,10 @@ import type { SaleItem, Sale, KOT, KOTItem } from '@/lib/types';
 import { ShopSelector } from '@/components/shop-selector';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { v4 as uuidv4 } from 'uuid';
+import { useTranslation } from '@/lib/useTranslation';
 
 export default function POSPage() {
+  const { t, showVAT } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'online' | 'cheque' | 'credit'>('cash');
@@ -135,7 +137,7 @@ export default function POSPage() {
     const currentQtyInCart = items.find(item => item.product_id === productId)?.quantity || 0;
     
     if (availableStock <= currentQtyInCart) {
-      alert(`Insufficient stock! Only ${availableStock} available.`);
+      alert(t('pos.insufficientStock', { stock: availableStock }));
       return;
     }
 
@@ -188,7 +190,7 @@ export default function POSPage() {
   // Handle complete sale
   async function handleCompleteSale() {
     if (items.length === 0) {
-      alert('Please add items to the sale');
+      alert(t('pos.addItemsFirst'));
       return;
     }
 
@@ -254,7 +256,7 @@ export default function POSPage() {
   // Handle send to kitchen (KOT)
   async function handleSendToKitchen() {
     if (items.length === 0) {
-      alert('Please add items to send to kitchen');
+      alert(t('pos.addItemsFirst'));
       return;
     }
 
@@ -264,7 +266,7 @@ export default function POSPage() {
     }
 
     if (isRestaurant && tableMode && !selectedTable) {
-      alert('Please select a table');
+      alert(t('pos.selectTable'));
       return;
     }
 
@@ -306,11 +308,11 @@ export default function POSPage() {
         {/* Header */}
         <header className="bg-white border-b border-slate-200 px-3 md:px-4 py-2 shadow-sm flex-shrink-0">
           <div className="flex items-center gap-2">
-            <h1 className="text-base md:text-xl font-bold text-slate-900 flex-shrink-0">POS</h1>
+            <h1 className="text-base md:text-xl font-bold text-slate-900 flex-shrink-0">{t('pos.title')}</h1>
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-2 top-2 h-3.5 w-3.5 text-slate-400" />
               <Input
-                placeholder="Search..."
+                placeholder={`${t('common.search')}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8 h-7 text-xs"
@@ -347,7 +349,7 @@ export default function POSPage() {
                       <div className={`absolute top-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-semibold shadow-lg ${
                         isOutOfStock ? 'bg-red-500 text-white' : stock <= (product.reorder_level || 10) ? 'bg-orange-500 text-white' : 'bg-slate-800/80 text-white'
                       }`}>
-                        {isOutOfStock ? 'Out' : `Stock: ${stock}`}
+                        {isOutOfStock ? t('pos.outOfStock') : `${t('pos.stock')}: ${stock}`}
                       </div>
                     </div>
                     <p className="font-semibold text-xs line-clamp-2 mb-0">{product.name}</p>
@@ -363,14 +365,14 @@ export default function POSPage() {
           <div className="hidden lg:flex w-80 lg:w-96 bg-white border-l flex-col h-full">
             {/* Cart Header */}
             <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
-              <h2 className="font-bold">Cart ({items.length})</h2>
+              <h2 className="font-bold">{t('pos.cart')} ({items.length})</h2>
               <ShoppingCart className="h-5 w-5" />
             </div>
 
             {items.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
                 <ShoppingCart className="h-16 w-16 text-slate-300 mb-3" />
-                <p className="text-slate-500">Cart is empty</p>
+                <p className="text-slate-500">{t('pos.cartEmpty')}</p>
               </div>
             ) : (
               <>
@@ -469,23 +471,23 @@ export default function POSPage() {
                   {/* Summary */}
                   <div className="p-3 bg-slate-50 space-y-1 text-sm">
                     <div className="flex justify-between">
-                      <span>Subtotal:</span>
+                      <span>{t('pos.subtotal')}:</span>
                       <span className="font-semibold">Rs {subtotal.toFixed(0)}</span>
                     </div>
                     {(totalDiscount > 0 || cartDiscount > 0) && (
                       <div className="flex justify-between text-green-700">
-                        <span>Discount:</span>
+                        <span>{t('pos.discount')}:</span>
                         <span className="font-semibold">-Rs {(totalDiscount + cartDiscount).toFixed(0)}</span>
                       </div>
                     )}
-                    {totalTax > 0 && (
+                    {showVAT() && totalTax > 0 && (
                       <div className="flex justify-between">
-                        <span>VAT (13%):</span>
+                        <span>{t('pos.vat')} (13%):</span>
                         <span className="font-semibold">Rs {totalTax.toFixed(0)}</span>
                       </div>
                     )}
                     <div className="flex justify-between font-bold text-base border-t pt-1">
-                      <span>Total:</span>
+                      <span>{t('pos.total')}:</span>
                       <span className="text-blue-600">Rs {totalAmount.toFixed(0)}</span>
                     </div>
                   </div>
@@ -493,7 +495,7 @@ export default function POSPage() {
                   {/* Total Discount Before VAT */}
                   <div className="px-3 py-2 border-t bg-yellow-50">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-slate-700">Extra Discount:</span>
+                      <span className="text-xs font-semibold text-slate-700">{t('pos.extraDiscount')}:</span>
                       <select
                         value={discountType}
                         onChange={(e) => setDiscountType(e.target.value as any)}
@@ -525,9 +527,9 @@ export default function POSPage() {
                         onChange={(e) => setSelectedTable(e.target.value ? parseInt(e.target.value) : null)}
                         className="w-full px-2 py-1.5 border rounded text-sm"
                       >
-                        <option value="">Select Table</option>
+                        <option value="">{t('pos.selectTable')}</option>
                         {Array.from({ length: totalTables }, (_, i) => i + 1).map((num) => (
-                          <option key={num} value={num}>Table {num}</option>
+                          <option key={num} value={num}>{t('pos.table')} {num}</option>
                         ))}
                       </select>
                     )}
@@ -536,7 +538,7 @@ export default function POSPage() {
                       onChange={(e) => setSelectedCustomer(e.target.value || null)}
                       className="w-full px-2 py-1.5 border rounded text-sm"
                     >
-                      <option value="">Walk-in</option>
+                      <option value="">{t('pos.walkIn')}</option>
                       {customers.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
@@ -546,9 +548,9 @@ export default function POSPage() {
                       onChange={(e) => setPaymentMethod(e.target.value as any)}
                       className="w-full px-2 py-1.5 border rounded text-sm"
                     >
-                      <option value="cash">Cash</option>
-                      <option value="card">Card</option>
-                      <option value="online">Online</option>
+                      <option value="cash">{t('pos.cash')}</option>
+                      <option value="card">{t('pos.card')}</option>
+                      <option value="online">{t('pos.online')}</option>
                     </select>
                   </div>
 
@@ -560,7 +562,7 @@ export default function POSPage() {
                         className="w-full bg-orange-600 hover:bg-orange-700 h-10"
                       >
                         <Send className="h-4 w-4 mr-2" />
-                        Send to Kitchen
+                        {t('pos.sendToKitchen')}
                       </Button>
                     )}
                     <Button
@@ -569,7 +571,7 @@ export default function POSPage() {
                       className="w-full bg-green-600 hover:bg-green-700 h-10"
                     >
                       <DollarSign className="h-4 w-4 mr-2" />
-                      {isProcessing ? 'Processing...' : 'Complete Sale'}
+                      {isProcessing ? t('common.processing') : t('pos.completeSale')}
                     </Button>
                     <Button
                       variant="outline"
@@ -577,7 +579,7 @@ export default function POSPage() {
                       className="w-full h-8 text-sm"
                     >
                       <Trash2 className="h-3 w-3 mr-2" />
-                      Clear
+                      {t('common.clear')}
                     </Button>
                   </div>
                 </div>
@@ -609,7 +611,7 @@ export default function POSPage() {
             <div className="relative w-full bg-white rounded-t-2xl flex flex-col shadow-2xl" style={{ maxHeight: 'calc(100vh - 80px)' }} onClick={(e) => e.stopPropagation()}>
               {/* Cart Header */}
               <div className="bg-blue-600 text-white px-3 py-2 flex items-center justify-between rounded-t-2xl flex-shrink-0">
-                <h2 className="font-bold text-sm">Cart ({items.length})</h2>
+                <h2 className="font-bold text-sm">{t('pos.cart')} ({items.length})</h2>
                 <button onClick={() => setShowCart(false)}>
                   <X className="h-5 w-5" />
                 </button>
@@ -696,23 +698,23 @@ export default function POSPage() {
                 {/* Summary */}
                 <div className="px-2 py-1 bg-slate-50 space-y-0.5 text-xs">
                   <div className="flex justify-between">
-                    <span>Subtotal:</span>
+                    <span>{t('pos.subtotal')}:</span>
                     <span className="font-semibold">Rs {subtotal.toFixed(0)}</span>
                   </div>
                   {(totalDiscount > 0 || cartDiscount > 0) && (
                     <div className="flex justify-between text-green-700">
-                      <span>Discount:</span>
+                      <span>{t('pos.discount')}:</span>
                       <span className="font-semibold">-Rs {(totalDiscount + cartDiscount).toFixed(0)}</span>
                     </div>
                   )}
-                  {totalTax > 0 && (
+                  {showVAT() && totalTax > 0 && (
                     <div className="flex justify-between">
-                      <span>VAT (13%):</span>
+                      <span>{t('pos.vat')} (13%):</span>
                       <span className="font-semibold">Rs {totalTax.toFixed(0)}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold text-sm border-t pt-0.5">
-                    <span>Total:</span>
+                    <span>{t('pos.total')}:</span>
                     <span className="text-blue-600">Rs {totalAmount.toFixed(0)}</span>
                   </div>
                 </div>
@@ -720,7 +722,7 @@ export default function POSPage() {
                 {/* Extra Discount */}
                 <div className="px-2 py-1 border-t bg-yellow-50">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-semibold text-slate-700">Extra:</span>
+                    <span className="text-[10px] font-semibold text-slate-700">{t('pos.extraDiscount')}:</span>
                     <select
                       value={discountType}
                       onChange={(e) => setDiscountType(e.target.value as any)}
@@ -753,9 +755,9 @@ export default function POSPage() {
                         onChange={(e) => setSelectedTable(e.target.value ? parseInt(e.target.value) : null)}
                         className="col-span-2 px-2 py-1 border rounded text-xs"
                       >
-                        <option value="">Table</option>
+                        <option value="">{t('pos.table')}</option>
                         {Array.from({ length: totalTables }, (_, i) => i + 1).map((num) => (
-                          <option key={num} value={num}>Table {num}</option>
+                          <option key={num} value={num}>{t('pos.table')} {num}</option>
                         ))}
                       </select>
                     )}
@@ -764,7 +766,7 @@ export default function POSPage() {
                       onChange={(e) => setSelectedCustomer(e.target.value || null)}
                       className="px-2 py-1 border rounded text-xs"
                     >
-                      <option value="">Walk-in</option>
+                      <option value="">{t('pos.walkIn')}</option>
                       {customers.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
@@ -774,9 +776,9 @@ export default function POSPage() {
                       onChange={(e) => setPaymentMethod(e.target.value as any)}
                       className="px-2 py-1 border rounded text-xs"
                     >
-                      <option value="cash">Cash</option>
-                      <option value="card">Card</option>
-                      <option value="online">Online</option>
+                      <option value="cash">{t('pos.cash')}</option>
+                      <option value="card">{t('pos.card')}</option>
+                      <option value="online">{t('pos.online')}</option>
                     </select>
                   </div>
                 </div>
@@ -789,7 +791,7 @@ export default function POSPage() {
                       className="w-full bg-orange-600 hover:bg-orange-700 h-9 text-sm font-semibold"
                     >
                       <Send className="h-4 w-4 mr-1" />
-                      Send to Kitchen
+                      {t('pos.sendToKitchen')}
                     </Button>
                   )}
                   <Button
@@ -798,7 +800,7 @@ export default function POSPage() {
                     className="w-full bg-green-600 hover:bg-green-700 h-9 text-sm font-semibold"
                   >
                     <DollarSign className="h-4 w-4 mr-1" />
-                    {isProcessing ? 'Processing...' : 'Complete Sale'}
+                    {isProcessing ? t('common.processing') : t('pos.completeSale')}
                   </Button>
                   <Button
                     variant="outline"
@@ -806,7 +808,7 @@ export default function POSPage() {
                     className="w-full h-7 text-xs"
                   >
                     <Trash2 className="h-3 w-3 mr-1" />
-                    Clear
+                    {t('common.clear')}
                   </Button>
                 </div>
               </div>
@@ -838,7 +840,7 @@ export default function POSPage() {
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
               <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between print-hide">
-                  <h2 className="font-bold text-lg">Invoice Preview</h2>
+                  <h2 className="font-bold text-lg">{t('invoice.preview')}</h2>
                   <button onClick={() => setShowInvoice(false)} className="text-slate-600 hover:text-slate-900">
                     <X className="h-5 w-5" />
                   </button>
@@ -848,7 +850,7 @@ export default function POSPage() {
                   {/* Invoice Header Row - Invoice & Print */}
                   <div className="invoice-header-row flex items-center justify-between mb-6 pb-3 border-b-2 border-black">
                     <div>
-                      <h2 className="text-2xl font-bold">INVOICE</h2>
+                      <h2 className="text-2xl font-bold">{t('invoice.title')}</h2>
                       <p className="text-sm text-slate-600 mt-1">{completedSale.sale_number}</p>
                     </div>
                     <Button 
@@ -857,30 +859,30 @@ export default function POSPage() {
                       className="bg-blue-600 hover:bg-blue-700 print-hide"
                     >
                       <Printer className="h-4 w-4 mr-2" />
-                      Print
+                      {t('common.print')}
                     </Button>
                   </div>
 
                   {/* Business Details */}
                   <div className="grid grid-cols-2 gap-8 mb-6">
                     <div>
-                      <h3 className="font-bold text-lg mb-2">From:</h3>
+                      <h3 className="font-bold text-lg mb-2">{t('invoice.from')}:</h3>
                       <p className="font-bold text-base">{shop?.name}</p>
-                      {shop?.ird_registered && <p className="text-xs font-semibold mt-1">TAX INVOICE</p>}
+                      {shop?.ird_registered && <p className="text-xs font-semibold mt-1">{t('invoice.taxInvoice')}</p>}
                       <p className="text-sm mt-1">{shop?.address}</p>
                       <p className="text-sm">Phone: {shop?.phone}</p>
                       {shop?.pan_number && <p className="text-sm">PAN: {shop?.pan_number}</p>}
                       {shop?.vat_number && <p className="text-sm">VAT: {shop?.vat_number}</p>}
                     </div>
                     <div className="text-right">
-                      <h3 className="font-bold text-lg mb-2">Invoice Details:</h3>
+                      <h3 className="font-bold text-lg mb-2">{t('invoice.details')}:</h3>
                       <div className="text-sm space-y-1">
-                        <p><span className="font-semibold">Date:</span> {new Date(completedSale.created_at).toLocaleDateString('en-GB')}</p>
-                        <p><span className="font-semibold">Time:</span> {new Date(completedSale.created_at).toLocaleTimeString('en-GB')}</p>
+                        <p><span className="font-semibold">{t('invoice.date')}:</span> {new Date(completedSale.created_at).toLocaleDateString('en-GB')}</p>
+                        <p><span className="font-semibold">{t('invoice.time')}:</span> {new Date(completedSale.created_at).toLocaleTimeString('en-GB')}</p>
                         {completedSale.table_number && (
-                          <p><span className="font-semibold">Table:</span> #{completedSale.table_number}</p>
+                          <p><span className="font-semibold">{t('pos.table')}:</span> #{completedSale.table_number}</p>
                         )}
-                        <p><span className="font-semibold">Payment:</span> <span className="uppercase">{completedSale.payment_method}</span></p>
+                        <p><span className="font-semibold">{t('invoice.payment')}:</span> <span className="uppercase">{completedSale.payment_method}</span></p>
                       </div>
                     </div>
                   </div>
@@ -890,10 +892,10 @@ export default function POSPage() {
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-slate-100 border-y-2 border-black">
-                          <th className="text-left py-2 px-3 font-bold">Item</th>
-                          <th className="text-center py-2 px-3 font-bold">Qty</th>
-                          <th className="text-right py-2 px-3 font-bold">Rate</th>
-                          <th className="text-right py-2 px-3 font-bold">Amount</th>
+                          <th className="text-left py-2 px-3 font-bold">{t('invoice.item')}</th>
+                          <th className="text-center py-2 px-3 font-bold">{t('invoice.qty')}</th>
+                          <th className="text-right py-2 px-3 font-bold">{t('invoice.rate')}</th>
+                          <th className="text-right py-2 px-3 font-bold">{t('invoice.amount')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -913,21 +915,23 @@ export default function POSPage() {
                   <div className="flex justify-end mb-6">
                     <div className="w-64 space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Subtotal:</span>
+                        <span>{t('pos.subtotal')}:</span>
                         <span className="font-semibold">Rs {completedSale.subtotal.toFixed(2)}</span>
                       </div>
                       {completedSale.discount_amount > 0 && (
                         <div className="flex justify-between text-sm text-green-700">
-                          <span>Discount:</span>
+                          <span>{t('pos.discount')}:</span>
                           <span className="font-semibold">-Rs {completedSale.discount_amount.toFixed(2)}</span>
                         </div>
                       )}
-                      <div className="flex justify-between text-sm">
-                        <span>VAT (13%):</span>
-                        <span className="font-semibold">Rs {completedSale.tax_amount.toFixed(2)}</span>
-                      </div>
+                      {showVAT() && (
+                        <div className="flex justify-between text-sm">
+                          <span>{t('pos.vat')} (13%):</span>
+                          <span className="font-semibold">Rs {completedSale.tax_amount.toFixed(2)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-lg font-bold border-t-2 border-black pt-2">
-                        <span>TOTAL:</span>
+                        <span>{t('pos.total').toUpperCase()}:</span>
                         <span>Rs {completedSale.total_amount.toFixed(2)}</span>
                       </div>
                     </div>
@@ -935,9 +939,9 @@ export default function POSPage() {
 
                   {/* Footer */}
                   <div className="text-center text-sm border-t border-slate-300 pt-4 space-y-1">
-                    <p className="font-semibold">Thank you for your business!</p>
+                    <p className="font-semibold">{t('invoice.thankYou')}</p>
                     {shop?.ird_registered && (
-                      <p className="text-xs text-slate-600">This is a computer generated invoice</p>
+                      <p className="text-xs text-slate-600">{t('invoice.computerGenerated')}</p>
                     )}
                   </div>
                 </div>

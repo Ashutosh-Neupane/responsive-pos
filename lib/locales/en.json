@@ -1,0 +1,63 @@
+{
+  "common": {
+    "search": "Search",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "clear": "Clear",
+    "close": "Close",
+    "print": "Print",
+    "loading": "Loading",
+    "processing": "Processing"
+  },
+  "pos": {
+    "title": "POS",
+    "cart": "Cart",
+    "cartEmpty": "Cart is empty",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "extraDiscount": "Extra",
+    "vat": "VAT",
+    "total": "Total",
+    "walkIn": "Walk-in",
+    "table": "Table",
+    "selectTable": "Select Table",
+    "cash": "Cash",
+    "card": "Card",
+    "online": "Online",
+    "completeSale": "Complete Sale",
+    "sendToKitchen": "Send to Kitchen",
+    "checkout": "Checkout",
+    "outOfStock": "Out",
+    "stock": "Stock",
+    "insufficientStock": "Insufficient stock! Only {stock} available",
+    "addItemsFirst": "Please add items to the sale"
+  },
+  "kitchen": {
+    "title": "Kitchen Display",
+    "active": "Active",
+    "noOrders": "No active orders",
+    "startPreparing": "Start Preparing",
+    "markReady": "Mark Ready",
+    "readyForPickup": "Ready for Pickup",
+    "orderReady": "Order Ready!"
+  },
+  "invoice": {
+    "title": "INVOICE",
+    "preview": "Invoice Preview",
+    "from": "From",
+    "taxInvoice": "TAX INVOICE",
+    "details": "Invoice Details",
+    "date": "Date",
+    "time": "Time",
+    "payment": "Payment",
+    "item": "Item",
+    "qty": "Qty",
+    "rate": "Rate",
+    "amount": "Amount",
+    "thankYou": "Thank you for your business!",
+    "computerGenerated": "This is a computer generated invoice"
+  }
+}

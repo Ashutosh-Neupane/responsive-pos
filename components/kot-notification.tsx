@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useKOTStore } from "@/lib/store";
+import { useTranslation } from "@/lib/useTranslation";
 import { Bell, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function KOTNotification() {
+  const { t } = useTranslation();
   const { kots, updateKOTStatus } = useKOTStore();
   const [readyKOTs, setReadyKOTs] = useState<string[]>([]);
   const [dismissed, setDismissed] = useState<string[]>([]);
@@ -33,9 +35,9 @@ export function KOTNotification() {
             <div className="flex items-start gap-3">
               <Bell className="h-6 w-6 flex-shrink-0" />
               <div className="flex-1">
-                <h3 className="font-bold text-lg">Order Ready!</h3>
+                <h3 className="font-bold text-lg">{t('kitchen.orderReady')}</h3>
                 <p className="text-sm">KOT #{kot.kot_number}</p>
-                {kot.table_number && <p className="text-sm">Table {kot.table_number}</p>}
+                {kot.table_number && <p className="text-sm">{t('pos.table')} {kot.table_number}</p>}
               </div>
               <Button
                 size="sm"
