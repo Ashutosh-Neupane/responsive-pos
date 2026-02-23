@@ -278,7 +278,7 @@ export default function POSPage() {
         <div className="flex-1 flex overflow-hidden">
           {/* Products Grid */}
           <div className="flex-1 overflow-y-auto p-2 md:p-4 pb-20 md:pb-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {(searchQuery ? searchResults : posProducts.slice(0, 100)).map((product) => {
                 const stock = getStock(product.id);
                 const isOutOfStock = stock === 0;
@@ -286,17 +286,23 @@ export default function POSPage() {
                   <div
                     key={product.id}
                     onClick={() => !isOutOfStock && handleAddProduct(product.id)}
-                    className={`bg-white rounded-lg border p-2 cursor-pointer hover:shadow-md transition ${isOutOfStock ? 'opacity-50' : ''}`}
+                    className={`bg-white rounded-lg border p-2 cursor-pointer hover:shadow-md transition flex flex-col ${isOutOfStock ? 'opacity-50' : ''}`}
                   >
-                    <div className="aspect-square bg-gradient-to-br from-blue-100 to-blue-50 rounded flex items-center justify-center mb-1.5">
+                    <div className="relative aspect-[4/3] sm:aspect-square bg-gradient-to-br from-blue-100 to-blue-50 rounded flex items-center justify-center mb-0">
                       {product.image_url ? (
                         <img src={product.image_url} alt={product.name} className="w-full h-full object-cover rounded" />
                       ) : (
                         <span className="text-xl sm:text-2xl font-bold text-blue-600">{product.name.charAt(0)}</span>
                       )}
+                      {/* Stock Badge - Top Left */}
+                      <div className={`absolute top-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-semibold shadow-lg ${
+                        isOutOfStock ? 'bg-red-500 text-white' : stock <= (product.reorder_level || 10) ? 'bg-orange-500 text-white' : 'bg-slate-800/80 text-white'
+                      }`}>
+                        {isOutOfStock ? 'Out' : `Stock: ${stock}`}
+                      </div>
                     </div>
-                    <p className="font-semibold text-xs line-clamp-2 mb-1">{product.name}</p>
-                    <p className="text-[10px] text-slate-500 mb-1">{isOutOfStock ? 'Out' : `Stock: ${stock}`}</p>
+                    <p className="font-semibold text-xs line-clamp-2 mb-0">{product.name}</p>
+                    <div className="flex-1"></div>
                     <p className="font-bold text-sm">Rs {product.selling_price.toFixed(0)}</p>
                   </div>
                 );

@@ -28,8 +28,10 @@ const bottomNavItems = [
 
 export function MobileBottomNav() {
   const pathname = usePathname();
-  const { user, shop } = useAuthStore();
+  const { user, shop, isAuthenticated } = useAuthStore();
   const [showMenu, setShowMenu] = useState(false);
+
+  if (!isAuthenticated) return null;
 
   const visibleItems = bottomNavItems.filter((item) => {
     const hasRole = !user?.role || item.roles.includes(user.role);

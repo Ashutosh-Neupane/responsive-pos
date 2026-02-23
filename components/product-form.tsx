@@ -11,7 +11,8 @@ import { BarcodeGenerator } from './barcode-generator';
 import { VariantConfig } from './variant-config';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Plus } from 'lucide-react';
+import { useUOMStore } from '@/lib/store';
 
 interface ProductFormProps {
   product?: Product;
@@ -22,7 +23,6 @@ interface ProductFormProps {
   parentProducts?: Product[]; // For creating child products
 }
 
-const defaultUnits = ['piece', 'kg', 'liter', 'box', 'pack', 'gram', 'meter', 'dozen'];
 const defaultCategories = ['General', 'Grains', 'Oils', 'Spices', 'Dairy', 'Vegetables', 'Fruits', 'Frozen'];
 
 export function ProductForm({
@@ -30,9 +30,11 @@ export function ProductForm({
   onSubmit,
   onCancel,
   categories = defaultCategories,
-  units = defaultUnits,
   parentProducts = [],
 }: ProductFormProps) {
+  const { units, addUnit } = useUOMStore();
+  const [showCustomUnit, setShowCustomUnit] = useState(false);
+  const [customUnit, setCustomUnit] = useState('');
   const [formData, setFormData] = useState<Partial<Product>>(
     product || {
       name: '',
@@ -43,7 +45,7 @@ export function ProductForm({
       selling_price: 0,
       discount_percentage: 0,
       discount_amount: 0,
-      tax_percentage: 5,
+      tax_percentage: 0,
       stock_quantity: 0,
       reorder_level: 10,
       is_parent_product: false,
@@ -61,6 +63,15 @@ export function ProductForm({
   const margin = formData.selling_price && formData.cost_price
     ? ((formData.selling_price - formData.cost_price) / formData.selling_price * 100).toFixed(2)
     : 0;
+
+  function handleAddCustomUnit() {
+    if (customUnit.trim()) {
+      addUnit(customUnit.trim());
+      setFormData({ ...formData, unit: customUnit.trim().toLowerCase() });
+      setCustomUnit('');
+      setShowCustomUnit(false);
+    }
+  }
 
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -262,31 +273,51 @@ export function ProductForm({
               step="0.01"
               min="0"
               max="100"
-              value={formData.tax_percentage || ''}
+              value={formData.tax_percentage ?? ''}
               onChange={(e) => setFormData({ ...formData, tax_percentage: e.target.value === '' ? 0 : parseFloat(e.target.value) })}
-              onBlur={(e) => {
-                const val = parseFloat(e.target.value);
-                if (isNaN(val) || val < 0) setFormData({ ...formData, tax_percentage: 0 });
-                else if (val > 100) setFormData({ ...formData, tax_percentage: 100 });
-              }}
-              placeholder="5"
+              placeholder="0"
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Unit *</Label>
-            <Select value={formData.unit} onValueChange={(v) => setFormData({ ...formData, unit: v })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {units.map((unit) => (
-                  <SelectItem key={unit} value={unit}>
-                    {unit}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Unit (UOM) *</Label>
+            {showCustomUnit ? (
+              <div className="flex gap-2">
+                <Input
+                  value={customUnit}
+                  onChange={(e) => setCustomUnit(e.target.value)}
+                  placeholder="Enter custom unit (e.g., bottle, bag)"
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomUnit())}
+                />
+                <Button type="button" onClick={handleAddCustomUnit} size="sm">
+                  Add
+                </Button>
+                <Button type="button" onClick={() => setShowCustomUnit(false)} variant="outline" size="sm">
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Select value={formData.unit} onValueChange={(v) => v === 'custom' ? setShowCustomUnit(true) : setFormData({ ...formData, unit: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="custom">
+                      <div className="flex items-center gap-2">
+                        <Plus className="h-3 w-3" />
+                        Add Custom Unit
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -298,12 +329,8 @@ export function ProductForm({
               <Input
                 type="number"
                 min="0"
-                value={formData.stock_quantity || ''}
+                value={formData.stock_quantity ?? ''}
                 onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value === '' ? 0 : parseInt(e.target.value) })}
-                onBlur={(e) => {
-                  const val = parseInt(e.target.value);
-                  if (isNaN(val) || val < 0) setFormData({ ...formData, stock_quantity: 0 });
-                }}
                 placeholder="0"
               />
             </div>
@@ -313,12 +340,8 @@ export function ProductForm({
               <Input
                 type="number"
                 min="0"
-                value={formData.reorder_level || ''}
+                value={formData.reorder_level ?? ''}
                 onChange={(e) => setFormData({ ...formData, reorder_level: e.target.value === '' ? 0 : parseInt(e.target.value) })}
-                onBlur={(e) => {
-                  const val = parseInt(e.target.value);
-                  if (isNaN(val) || val < 0) setFormData({ ...formData, reorder_level: 0 });
-                }}
                 placeholder="10"
               />
             </div>

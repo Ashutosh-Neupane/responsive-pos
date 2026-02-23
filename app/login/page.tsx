@@ -41,15 +41,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col relative overflow-hidden">
       {/* Top Blue Banner */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 text-white py-12 px-4 relative">
+      <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 text-white py-4 md:py-12 px-4 relative">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center font-bold text-lg">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center font-bold text-sm md:text-lg">
               SN
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{language === 'en' ? 'Sudha Nepali' : 'सुधा नेपाली'}</h1>
-              <p className="text-blue-100 text-sm">{language === 'en' ? 'Modern POS System' : 'आधुनिक POS प्रणाली'}</p>
+              <h1 className="text-sm md:text-2xl font-bold">{language === 'en' ? 'Sudha Nepali' : 'सुधा नेपाली'}</h1>
+              <p className="text-blue-100 text-xs md:text-sm hidden md:block">{language === 'en' ? 'Modern POS System' : 'आधुनिक POS प्रणाली'}</p>
             </div>
           </div>
           <div className="hidden md:block">
@@ -59,18 +59,18 @@ export default function LoginPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-4 py-6 md:p-4">
         <div className="w-full max-w-md">
           {/* Mobile Language Switcher */}
-          <div className="md:hidden flex justify-end mb-4">
+          <div className="md:hidden flex justify-end mb-3">
             <LanguageSwitcher />
           </div>
 
           {/* Login Card */}
           <Card className="border-0 shadow-lg bg-white">
-            <CardContent className="pt-8 pb-8 px-8">
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">{t('login')}</h2>
+            <CardContent className="pt-6 pb-6 px-6 md:pt-8 md:pb-8 md:px-8">
+              <div className="mb-6 md:mb-8">
+                <h2 className="text-3xl md:text-2xl font-bold text-slate-900 mb-2">{t('login')}</h2>
                 <p className="text-slate-600 text-sm">
                   {language === 'en' 
                     ? 'Welcome back. Sign in to your account to continue.' 
@@ -140,7 +140,7 @@ export default function LoginPage() {
                 </Button>
               </Link>
 
-              <div className="mt-8 p-4 bg-gradient-to-br from-blue-50 to-slate-50 border border-blue-100 rounded-lg text-xs text-slate-600 space-y-3">
+              <div className="mt-6 md:mt-8 p-3 md:p-4 bg-gradient-to-br from-blue-50 to-slate-50 border border-blue-100 rounded-lg text-xs text-slate-600 space-y-2 md:space-y-3">
                 <p className="font-semibold text-slate-900">{language === 'en' ? '🎭 Demo Credentials - Role-Based Access' : '🎭 डेमो प्रमाणपत्र - भूमिका-आधारित पहुँच'}</p>
                 <div className="space-y-3">
                   <div className="p-2 bg-white rounded border border-blue-100">
@@ -172,7 +172,7 @@ export default function LoginPage() {
             </CardContent>
           </Card>
 
-          <p className="text-center text-xs text-slate-500 mt-6">
+          <p className="text-center text-xs text-slate-500 mt-4 md:mt-6">
             {language === 'en' 
               ? '© 2024 Sudha Nepali. All rights reserved.' 
               : '© 2024 सुधा नेपाली। सर्वाधिकार सुरक्षित।'}

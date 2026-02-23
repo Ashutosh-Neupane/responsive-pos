@@ -154,7 +154,7 @@ export default function ProductsPage() {
       <main className="flex-1 overflow-auto">
         <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Products</h1>
               <p className="text-sm sm:text-base text-slate-600 mt-1">Manage your product inventory</p>
@@ -164,7 +164,7 @@ export default function ProductsPage() {
                 setEditingProduct(null);
                 setShowForm(true);
               }}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 h-9 sm:h-10"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Product
@@ -226,7 +226,7 @@ export default function ProductsPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-max">
+            <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 auto-rows-max">
               {filteredProducts.map((product) => {
                 const variants = products.filter(p => p.parent_product_id === product.id);
                 return (

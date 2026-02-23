@@ -521,3 +521,29 @@ export const useUIStore = create<UIState>()(
     }
   )
 );
+
+// UOM (Unit of Measure) Store
+interface UOMState {
+  units: string[];
+  addUnit: (unit: string) => void;
+  removeUnit: (unit: string) => void;
+}
+
+export const useUOMStore = create<UOMState>()(
+  persist(
+    (set) => ({
+      units: ['piece', 'kg', 'liter', 'box', 'pack', 'gram', 'meter', 'dozen'],
+      addUnit: (unit) =>
+        set((state) => ({
+          units: state.units.includes(unit.toLowerCase()) ? state.units : [...state.units, unit.toLowerCase()],
+        })),
+      removeUnit: (unit) =>
+        set((state) => ({
+          units: state.units.filter((u) => u !== unit),
+        })),
+    }),
+    {
+      name: 'uom-store',
+    }
+  )
+);

@@ -51,8 +51,8 @@ export function ProductCard({
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg overflow-hidden hover:shadow-lg hover:border-blue-300 transition-all flex flex-col">
-      {/* Product Image - Full Width */}
-      <div className="relative w-full aspect-square bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
+      {/* Product Image - Wider aspect ratio for mobile */}
+      <div className="relative w-full aspect-[4/3] sm:aspect-square bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
         {product.image_url ? (
           <Image src={product.image_url} alt={product.name} fill className="object-cover" />
         ) : (
@@ -60,52 +60,65 @@ export function ProductCard({
             <Package className="h-16 w-16 text-slate-300" />
           </div>
         )}
-        {isLowStock && (
-          <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full flex items-center gap-1 text-xs font-semibold shadow-lg">
-            <AlertCircle className="h-3 w-3" />
-            Low
+        {/* Stock Badge - Top Left */}
+        {product.stock_quantity !== undefined && (
+          <div className={`absolute top-1 left-1 sm:top-2 sm:left-2 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-[9px] sm:text-xs font-semibold shadow-lg ${
+            isLowStock ? 'bg-orange-500 text-white' : 'bg-slate-800/80 text-white'
+          }`}>
+            Stock: {product.stock_quantity}
+          </div>
+        )}
+        {/* Variants Badge - Top Right */}
+        {product.is_parent_product && variants.length > 0 && (
+          <div className="absolute top-1 right-1 sm:top-2 sm:right-2 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-[9px] sm:text-xs font-semibold shadow-lg bg-blue-600 text-white">
+            {variants.length} Var
           </div>
         )}
       </div>
 
       {/* Product Details */}
-      <div className="p-3 flex-1 flex flex-col">
-        {/* Name */}
-        <h3 className="font-bold text-slate-900 text-sm line-clamp-2 mb-1 min-h-[2.5rem]">
+      <div className="p-1.5 sm:p-3 flex-1 flex flex-col gap-0">
+        {/* Name + SKU - No spacing */}
+        <h3 className="font-bold text-slate-900 text-[11px] leading-tight sm:text-sm line-clamp-2 mb-0">
           {product.name}
         </h3>
-        
-        {/* SKU */}
-        <p className="text-xs text-slate-500 font-mono mb-2">{product.sku}</p>
-        
-        {/* Stock & Variants */}
-        <div className="flex gap-1.5 items-center flex-wrap mb-2">
-          {product.stock_quantity !== undefined && (
-            <Badge variant={isLowStock ? 'destructive' : 'secondary'} className="text-xs px-1.5 py-0">
-              Stock: {product.stock_quantity}
-            </Badge>
-          )}
-          {product.is_parent_product && variants.length > 0 && (
-            <Badge variant="outline" className="text-xs px-1.5 py-0 border-blue-300 text-blue-700">
-              {variants.length} Variant{variants.length !== 1 ? 's' : ''}
-            </Badge>
-          )}
-        </div>
+        <p className="text-[9px] sm:text-xs text-slate-500 font-mono mb-0">{product.sku}</p>
+
+        {/* Spacer to push price to bottom */}
+        <div className="flex-1"></div>
 
         {/* Cost & Selling Price */}
-        <div className="flex items-center gap-2 text-xs flex-wrap mt-auto">
-          {product.cost_price > 0 && (
-            <>
-              <span className="text-slate-500">Cost:</span>
-              <span className="font-semibold text-slate-700">Rs {formatPrice(product.cost_price)}</span>
-              <span className="text-slate-300">|</span>
-            </>
-          )}
-          <span className="text-slate-500">Sale:</span>
-          <span className="font-bold text-blue-600 text-sm">Rs {formatPrice(finalPrice)}</span>
+        <div className="space-y-0">
+          {/* Mobile: Stacked layout */}
+          <div className="flex sm:hidden flex-col gap-0 text-[9px]">
+            {product.cost_price > 0 && (
+              <div className="flex items-center gap-1">
+                <span className="text-slate-500">Cost:</span>
+                <span className="font-semibold text-slate-700">Rs {formatPrice(product.cost_price)}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1">
+              <span className="text-slate-500">Sale:</span>
+              <span className="font-bold text-blue-600">Rs {formatPrice(finalPrice)}</span>
+            </div>
+          </div>
+          
+          {/* Desktop: Inline layout */}
+          <div className="hidden sm:flex items-center gap-2 text-xs flex-wrap">
+            {product.cost_price > 0 && (
+              <>
+                <span className="text-slate-500">Cost:</span>
+                <span className="font-semibold text-slate-700">Rs {formatPrice(product.cost_price)}</span>
+                <span className="text-slate-300">|</span>
+              </>
+            )}
+            <span className="text-slate-500">Sale:</span>
+            <span className="font-bold text-blue-600 text-sm">Rs {formatPrice(finalPrice)}</span>
+          </div>
+          
           {(product.discount_percentage || product.discount_amount) && (
-            <Badge className="text-xs bg-green-100 text-green-700 px-1.5 py-0">
-              {product.discount_percentage ? `${product.discount_percentage}% OFF` : `Rs ${formatPrice(product.discount_amount)} OFF`}
+            <Badge className="text-[9px] sm:text-xs bg-green-100 text-green-700 px-1 sm:px-1.5 py-0 leading-tight h-3.5 sm:h-auto mt-0.5">
+              {product.discount_percentage ? `${product.discount_percentage}%` : `Rs ${formatPrice(product.discount_amount)}`}
             </Badge>
           )}
         </div>
@@ -113,24 +126,24 @@ export function ProductCard({
 
       {/* Actions */}
       <div className="grid grid-cols-4 border-t border-slate-200 bg-slate-50">
-        <button onClick={() => onEdit?.(product)} className="flex items-center justify-center py-2.5 hover:bg-blue-50 hover:text-blue-700 transition text-slate-600">
-          <Edit className="h-4 w-4" />
+        <button onClick={() => onEdit?.(product)} className="flex items-center justify-center py-1.5 sm:py-2.5 hover:bg-blue-50 hover:text-blue-700 transition text-slate-600">
+          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
         </button>
-        <button onClick={() => onDuplicate?.(product)} className="flex items-center justify-center py-2.5 hover:bg-slate-100 transition text-slate-600">
-          <Copy className="h-4 w-4" />
+        <button onClick={() => onDuplicate?.(product)} className="flex items-center justify-center py-1.5 sm:py-2.5 hover:bg-slate-100 transition text-slate-600">
+          <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
         </button>
         {product.is_parent_product && (
-          <button onClick={() => onCreateVariant?.(product)} className="flex items-center justify-center py-2.5 hover:bg-green-50 hover:text-green-700 transition text-slate-600">
-            <Plus className="h-4 w-4" />
+          <button onClick={() => onCreateVariant?.(product)} className="flex items-center justify-center py-1.5 sm:py-2.5 hover:bg-green-50 hover:text-green-700 transition text-slate-600">
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
           </button>
         )}
         {product.is_parent_product && variants.length > 0 && (
-          <button onClick={() => { setShowVariants(!showVariants); onViewVariants?.(product.id); }} className="flex items-center justify-center py-2.5 hover:bg-slate-100 transition text-slate-600">
-            <ChevronDown className={`h-4 w-4 transition-transform ${showVariants ? 'rotate-180' : ''}`} />
+          <button onClick={() => { setShowVariants(!showVariants); onViewVariants?.(product.id); }} className="flex items-center justify-center py-1.5 sm:py-2.5 hover:bg-slate-100 transition text-slate-600">
+            <ChevronDown className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform ${showVariants ? 'rotate-180' : ''}`} />
           </button>
         )}
-        <button onClick={() => onDelete?.(product.id)} className="flex items-center justify-center py-2.5 text-red-600 hover:bg-red-50 transition">
-          <Trash2 className="h-4 w-4" />
+        <button onClick={() => onDelete?.(product.id)} className="flex items-center justify-center py-1.5 sm:py-2.5 text-red-600 hover:bg-red-50 transition">
+          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
         </button>
       </div>
 
