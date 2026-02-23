@@ -1,35 +1,40 @@
 {
   "name": "Sudha Nepali POS - Point of Sale System",
   "short_name": "Sudha POS",
-  "description": "Modern Point of Sale system for Nepali businesses",
+  "description": "Modern Point of Sale system for Nepali businesses with inventory, sales, and customer management",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "fullscreen"],
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
   "orientation": "any",
-  "prefer_related_applications": false,
+  "scope": "/",
   "icons": [
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
+      "purpose": "any"
+    },
     {
-      "name": "POS",
-      "url": "/dashboard/pos",
-      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["business", "finance", "productivity"]
+  "categories": ["business", "finance", "productivity"],
+  "lang": "en-US"
 }

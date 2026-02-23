@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { MobileBottomNav } from '@/components/mobile-bottom-nav'
-import { PWAInstallPrompt } from '@/components/pwa-install-prompt'
+import { PWAInstallButton } from '@/components/pwa-install-button'
+import { PWAHandler } from '@/components/pwa-handler'
 import { PWARegister } from '@/components/pwa-register'
 import './globals.css'
 
@@ -51,9 +52,10 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased pb-16 md:pb-0">
         <PWARegister />
+        <PWAHandler />
         {children}
         <MobileBottomNav />
-        <PWAInstallPrompt />
+        <PWAInstallButton />
         <Analytics />
       </body>
     </html>
