@@ -140,6 +140,29 @@ export interface Table {
   updated_at: string;
 }
 
+// KOT (Kitchen Order Ticket)
+export interface KOT {
+  id: string;
+  shop_id: string;
+  kot_number: string;
+  table_number?: number;
+  items: KOTItem[];
+  status: 'pending' | 'preparing' | 'ready' | 'served';
+  created_by: string;
+  created_at: string;
+  prepared_at?: string;
+  ready_at?: string;
+  served_at?: string;
+}
+
+export interface KOTItem {
+  id: string;
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  notes?: string;
+}
+
 // Sales & POS
 export interface Sale {
   id: string;

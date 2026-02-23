@@ -5,6 +5,7 @@ import { MobileBottomNav } from '@/components/mobile-bottom-nav'
 import { PWAInstallButton } from '@/components/pwa-install-button'
 import { PWAHandler } from '@/components/pwa-handler'
 import { PWARegister } from '@/components/pwa-register'
+import { KOTNotification } from '@/components/kot-notification'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -55,6 +56,7 @@ export default function RootLayout({
         <PWAHandler />
         {children}
         <MobileBottomNav />
+        <KOTNotification />
         <PWAInstallButton />
         <Analytics />
       </body>

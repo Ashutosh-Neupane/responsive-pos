@@ -10,6 +10,8 @@ import type {
   Khata,
   Expense,
   DashboardStats,
+  KOT,
+  KOTItem,
 } from './types';
 
 // Auth Store
@@ -552,6 +554,52 @@ export const useUOMStore = create<UOMState>()(
     }),
     {
       name: 'uom-store',
+    }
+  )
+);
+
+// KOT (Kitchen Order Ticket) Store
+interface KOTState {
+  kots: KOT[];
+  addKOT: (kot: KOT) => void;
+  updateKOTStatus: (kotId: string, status: KOT['status']) => void;
+  getActiveKOTs: () => KOT[];
+  getKOTsByTable: (tableNumber: number) => KOT[];
+}
+
+export const useKOTStore = create<KOTState>()(
+  persist(
+    (set, get) => ({
+      kots: [],
+      addKOT: (kot) =>
+        set((state) => ({
+          kots: [...state.kots, kot],
+        })),
+      updateKOTStatus: (kotId, status) =>
+        set((state) => ({
+          kots: state.kots.map((k) =>
+            k.id === kotId
+              ? {
+                  ...k,
+                  status,
+                  prepared_at: status === 'preparing' ? new Date().toISOString() : k.prepared_at,
+                  ready_at: status === 'ready' ? new Date().toISOString() : k.ready_at,
+                  served_at: status === 'served' ? new Date().toISOString() : k.served_at,
+                }
+              : k
+          ),
+        })),
+      getActiveKOTs: () => {
+        const state = get();
+        return state.kots.filter((k) => k.status !== 'served');
+      },
+      getKOTsByTable: (tableNumber) => {
+        const state = get();
+        return state.kots.filter((k) => k.table_number === tableNumber && k.status !== 'served');
+      },
+    }),
+    {
+      name: 'kot-store',
     }
   )
 );

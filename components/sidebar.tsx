@@ -24,6 +24,7 @@ import { LanguageSwitcher } from './language-switcher';
 const menuItems = [
   { href: '/dashboard', icon: Home, label: 'Dashboard', roles: ['owner', 'manager', 'cashier', 'staff'], categories: ['all'] },
   { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS', roles: ['owner', 'manager', 'cashier', 'staff'], categories: ['all'] },
+  { href: '/dashboard/kitchen', icon: UtensilsCrossed, label: 'Kitchen', roles: ['owner', 'manager', 'staff'], categories: ['restaurant'] },
   { href: '/dashboard/sales', icon: Receipt, label: 'Sales', roles: ['owner', 'manager'], categories: ['all'] },
   { href: '/dashboard/products', icon: Package, label: 'Products', roles: ['owner', 'manager'], categories: ['all'] },
   { href: '/dashboard/recipes', icon: ChefHat, label: 'Recipes', roles: ['owner', 'manager'], categories: ['restaurant'] },

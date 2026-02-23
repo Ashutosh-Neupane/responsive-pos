@@ -2,7 +2,7 @@
   "name": "Sudha Nepali POS - Point of Sale System",
   "short_name": "Sudha POS",
   "description": "Modern Point of Sale system for Nepali businesses with inventory, sales, and customer management",
-  "start_url": "/",
+  "start_url": "/dashboard",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",

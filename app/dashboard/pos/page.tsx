@@ -11,9 +11,10 @@ import {
   useSalesStore,
   useAuthStore,
   useInventoryStore,
+  useKOTStore,
 } from '@/lib/store';
-import { Plus, Minus, Trash2, Search, DollarSign, ShoppingCart, X, RefreshCw, UtensilsCrossed, Printer } from 'lucide-react';
-import type { SaleItem, Sale } from '@/lib/types';
+import { Plus, Minus, Trash2, Search, DollarSign, ShoppingCart, X, RefreshCw, UtensilsCrossed, Printer, Send } from 'lucide-react';
+import type { SaleItem, Sale, KOT, KOTItem } from '@/lib/types';
 import { ShopSelector } from '@/components/shop-selector';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { v4 as uuidv4 } from 'uuid';
@@ -40,6 +41,7 @@ export default function POSPage() {
   const { addSale } = useSalesStore();
   const { user, shop } = useAuthStore();
   const { getProductStock, updateStock } = useInventoryStore();
+  const { addKOT } = useKOTStore();
 
   const isRestaurant = shop?.category === 'restaurant';
   const tableMode = shop?.table_mode_enabled || false;
@@ -246,6 +248,53 @@ export default function POSPage() {
       console.error('[v0] Error:', error);
     } finally {
       setIsProcessing(false);
+    }
+  }
+
+  // Handle send to kitchen (KOT)
+  async function handleSendToKitchen() {
+    if (items.length === 0) {
+      alert('Please add items to send to kitchen');
+      return;
+    }
+
+    if (!user || !shop) {
+      alert('User or shop not found');
+      return;
+    }
+
+    if (isRestaurant && tableMode && !selectedTable) {
+      alert('Please select a table');
+      return;
+    }
+
+    try {
+      const kotCount = (useKOTStore.getState().kots.length + 1).toString().padStart(4, '0');
+      const kotNumber = `KOT-${kotCount}`;
+
+      const kotItems: KOTItem[] = items.map(item => ({
+        id: uuidv4(),
+        product_id: item.product_id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+      }));
+
+      const kot: KOT = {
+        id: uuidv4(),
+        shop_id: shop.id,
+        kot_number: kotNumber,
+        table_number: selectedTable || undefined,
+        items: kotItems,
+        status: 'pending',
+        created_by: user.id,
+        created_at: new Date().toISOString(),
+      };
+
+      addKOT(kot);
+      alert(`KOT ${kotNumber} sent to kitchen!`);
+    } catch (error) {
+      alert('Error sending to kitchen');
+      console.error('KOT Error:', error);
     }
   }
 
@@ -505,6 +554,15 @@ export default function POSPage() {
 
                   {/* Action Buttons */}
                   <div className="p-3 space-y-2">
+                    {isRestaurant && (
+                      <Button
+                        onClick={handleSendToKitchen}
+                        className="w-full bg-orange-600 hover:bg-orange-700 h-10"
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Send to Kitchen
+                      </Button>
+                    )}
                     <Button
                       onClick={handleCompleteSale}
                       disabled={isProcessing}
@@ -725,6 +783,15 @@ export default function POSPage() {
 
                 {/* Action Buttons */}
                 <div className="px-2 py-1.5 space-y-1">
+                  {isRestaurant && (
+                    <Button
+                      onClick={handleSendToKitchen}
+                      className="w-full bg-orange-600 hover:bg-orange-700 h-9 text-sm font-semibold"
+                    >
+                      <Send className="h-4 w-4 mr-1" />
+                      Send to Kitchen
+                    </Button>
+                  )}
                   <Button
                     onClick={handleCompleteSale}
                     disabled={isProcessing}
