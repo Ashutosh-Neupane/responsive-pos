@@ -743,110 +743,134 @@ export default function POSPage() {
 
         {/* Invoice Modal */}
         {showInvoice && completedSale && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between">
-                <h2 className="font-bold text-lg">Invoice</h2>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={() => window.print()} className="bg-blue-600">
-                    <Printer className="h-4 w-4 mr-1" />
-                    Print
-                  </Button>
-                  <button onClick={() => setShowInvoice(false)} className="text-slate-600">
+          <>
+            <style jsx global>{`
+              @media print {
+                @page { size: A4; margin: 10mm; }
+                body * { visibility: hidden; }
+                #invoice-print, #invoice-print * { visibility: visible; }
+                #invoice-print { 
+                  position: absolute; 
+                  left: 0; 
+                  top: 0; 
+                  width: 100%; 
+                  max-width: 210mm;
+                  margin: 0;
+                  padding: 20px;
+                }
+                .print-hide { display: none !important; }
+                .invoice-header-row { display: flex !important; }
+              }
+            `}</style>
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between print-hide">
+                  <h2 className="font-bold text-lg">Invoice Preview</h2>
+                  <button onClick={() => setShowInvoice(false)} className="text-slate-600 hover:text-slate-900">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
-              </div>
-              
-              <div className="p-6 font-mono text-sm">
-                {/* Invoice Header */}
-                <div className="text-center border-b-2 border-dashed pb-3 mb-3">
-                  <h1 className="text-lg font-bold">{shop?.name}</h1>
-                  {shop?.ird_registered && <p className="text-xs font-bold mt-1">TAX INVOICE</p>}
-                  <p className="text-xs mt-1">{shop?.address}</p>
-                  <p className="text-xs">Phone: {shop?.phone}</p>
-                  {shop?.pan_number && <p className="text-xs">PAN: {shop?.pan_number}</p>}
-                  {shop?.vat_number && <p className="text-xs">VAT: {shop?.vat_number}</p>}
-                </div>
-
-                {/* Invoice Details */}
-                <div className="text-xs space-y-1 mb-3">
-                  <div className="flex justify-between">
-                    <span>Invoice:</span>
-                    <span className="font-bold">{completedSale.sale_number}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Date:</span>
-                    <span>{new Date(completedSale.created_at).toLocaleString()}</span>
-                  </div>
-                  {completedSale.table_number && (
-                    <div className="flex justify-between">
-                      <span>Table:</span>
-                      <span className="font-bold">#{completedSale.table_number}</span>
+                
+                <div id="invoice-print" className="p-8">
+                  {/* Invoice Header Row - Invoice & Print */}
+                  <div className="invoice-header-row flex items-center justify-between mb-6 pb-3 border-b-2 border-black">
+                    <div>
+                      <h2 className="text-2xl font-bold">INVOICE</h2>
+                      <p className="text-sm text-slate-600 mt-1">{completedSale.sale_number}</p>
                     </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span>Payment:</span>
-                    <span className="uppercase">{completedSale.payment_method}</span>
+                    <Button 
+                      size="sm" 
+                      onClick={() => window.print()} 
+                      className="bg-blue-600 hover:bg-blue-700 print-hide"
+                    >
+                      <Printer className="h-4 w-4 mr-2" />
+                      Print
+                    </Button>
                   </div>
-                </div>
 
-                {/* Items */}
-                <div className="border-t-2 border-b-2 border-dashed py-2 mb-3">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-1">Item</th>
-                        <th className="text-center">Qty</th>
-                        <th className="text-right">Rate</th>
-                        <th className="text-right">Amt</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {completedSale.items.map((item, idx) => (
-                        <tr key={idx} className="border-b">
-                          <td className="py-1">{item.product_name}</td>
-                          <td className="text-center">{item.quantity}</td>
-                          <td className="text-right">{item.unit_price.toFixed(0)}</td>
-                          <td className="text-right font-semibold">{item.subtotal.toFixed(0)}</td>
+                  {/* Business Details */}
+                  <div className="grid grid-cols-2 gap-8 mb-6">
+                    <div>
+                      <h3 className="font-bold text-lg mb-2">From:</h3>
+                      <p className="font-bold text-base">{shop?.name}</p>
+                      {shop?.ird_registered && <p className="text-xs font-semibold mt-1">TAX INVOICE</p>}
+                      <p className="text-sm mt-1">{shop?.address}</p>
+                      <p className="text-sm">Phone: {shop?.phone}</p>
+                      {shop?.pan_number && <p className="text-sm">PAN: {shop?.pan_number}</p>}
+                      {shop?.vat_number && <p className="text-sm">VAT: {shop?.vat_number}</p>}
+                    </div>
+                    <div className="text-right">
+                      <h3 className="font-bold text-lg mb-2">Invoice Details:</h3>
+                      <div className="text-sm space-y-1">
+                        <p><span className="font-semibold">Date:</span> {new Date(completedSale.created_at).toLocaleDateString('en-GB')}</p>
+                        <p><span className="font-semibold">Time:</span> {new Date(completedSale.created_at).toLocaleTimeString('en-GB')}</p>
+                        {completedSale.table_number && (
+                          <p><span className="font-semibold">Table:</span> #{completedSale.table_number}</p>
+                        )}
+                        <p><span className="font-semibold">Payment:</span> <span className="uppercase">{completedSale.payment_method}</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Items Table */}
+                  <div className="mb-6">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-slate-100 border-y-2 border-black">
+                          <th className="text-left py-2 px-3 font-bold">Item</th>
+                          <th className="text-center py-2 px-3 font-bold">Qty</th>
+                          <th className="text-right py-2 px-3 font-bold">Rate</th>
+                          <th className="text-right py-2 px-3 font-bold">Amount</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Totals */}
-                <div className="text-xs space-y-1 mb-3">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>Rs {completedSale.subtotal.toFixed(2)}</span>
+                      </thead>
+                      <tbody>
+                        {completedSale.items.map((item, idx) => (
+                          <tr key={idx} className="border-b border-slate-300">
+                            <td className="py-2 px-3">{item.product_name}</td>
+                            <td className="text-center py-2 px-3">{item.quantity}</td>
+                            <td className="text-right py-2 px-3">Rs {item.unit_price.toFixed(2)}</td>
+                            <td className="text-right py-2 px-3 font-semibold">Rs {item.subtotal.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  {completedSale.discount_amount > 0 && (
-                    <div className="flex justify-between text-green-700">
-                      <span>Discount:</span>
-                      <span>-Rs {completedSale.discount_amount.toFixed(2)}</span>
+
+                  {/* Totals */}
+                  <div className="flex justify-end mb-6">
+                    <div className="w-64 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotal:</span>
+                        <span className="font-semibold">Rs {completedSale.subtotal.toFixed(2)}</span>
+                      </div>
+                      {completedSale.discount_amount > 0 && (
+                        <div className="flex justify-between text-sm text-green-700">
+                          <span>Discount:</span>
+                          <span className="font-semibold">-Rs {completedSale.discount_amount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-sm">
+                        <span>VAT (13%):</span>
+                        <span className="font-semibold">Rs {completedSale.tax_amount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold border-t-2 border-black pt-2">
+                        <span>TOTAL:</span>
+                        <span>Rs {completedSale.total_amount.toFixed(2)}</span>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span>VAT (13%):</span>
-                    <span>Rs {completedSale.tax_amount.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between font-bold text-base border-t-2 pt-2 mt-2">
-                    <span>TOTAL:</span>
-                    <span>Rs {completedSale.total_amount.toFixed(2)}</span>
-                  </div>
-                </div>
 
-                {/* Footer */}
-                <div className="text-center text-xs border-t border-dashed pt-3 space-y-1">
-                  <p className="font-semibold">Thank you for your visit!</p>
-                  {shop?.ird_registered && (
-                    <p className="text-xs text-slate-600">Computer generated invoice</p>
-                  )}
+                  {/* Footer */}
+                  <div className="text-center text-sm border-t border-slate-300 pt-4 space-y-1">
+                    <p className="font-semibold">Thank you for your business!</p>
+                    {shop?.ird_registered && (
+                      <p className="text-xs text-slate-600">This is a computer generated invoice</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

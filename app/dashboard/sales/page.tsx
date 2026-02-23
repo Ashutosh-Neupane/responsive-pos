@@ -1,17 +1,20 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAuthStore, useSalesStore } from '@/lib/store';
-import { Receipt, Calendar, DollarSign } from 'lucide-react';
+import { Receipt, Calendar, DollarSign, Eye, Printer, X } from 'lucide-react';
 import { RoleGuard } from '@/components/role-guard';
+import type { Sale } from '@/lib/types';
 
 export default function SalesPage() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, shop } = useAuthStore();
   const { sales } = useSalesStore();
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -55,7 +58,7 @@ export default function SalesPage() {
                 sortedSales.map((sale) => (
                   <Card key={sale.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-4">
                         {/* Left: Invoice Info */}
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
@@ -93,7 +96,8 @@ export default function SalesPage() {
                           </div>
                         </div>
 
-                        {/* Right: Amounts */}
+                        {/* Right: Amounts & Actions */}
+                        <div className="flex flex-col items-end gap-2">
                         <div className="text-right space-y-1">
                           {sale.discount_amount > 0 && (
                             <div className="text-sm text-green-700">
@@ -109,6 +113,15 @@ export default function SalesPage() {
                           <div className="text-xs text-slate-500">
                             (incl. VAT Rs {sale.tax_amount.toFixed(2)})
                           </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          onClick={() => setSelectedSale(sale)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          View Invoice
+                        </Button>
                         </div>
                       </div>
 
@@ -134,6 +147,137 @@ export default function SalesPage() {
             </div>
           </div>
         </main>
+
+        {/* Invoice Modal */}
+        {selectedSale && (
+          <>
+            <style jsx global>{`
+              @media print {
+                @page { size: A4; margin: 10mm; }
+                body * { visibility: hidden; }
+                #invoice-print, #invoice-print * { visibility: visible; }
+                #invoice-print { 
+                  position: absolute; 
+                  left: 0; 
+                  top: 0; 
+                  width: 100%; 
+                  max-width: 210mm;
+                  margin: 0;
+                  padding: 20px;
+                }
+                .print-hide { display: none !important; }
+                .invoice-header-row { display: flex !important; }
+              }
+            `}</style>
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between print-hide">
+                  <h2 className="font-bold text-lg">Invoice Preview</h2>
+                  <button onClick={() => setSelectedSale(null)} className="text-slate-600 hover:text-slate-900">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                
+                <div id="invoice-print" className="p-8">
+                  {/* Invoice Header Row - Invoice & Print */}
+                  <div className="invoice-header-row flex items-center justify-between mb-6 pb-3 border-b-2 border-black">
+                    <div>
+                      <h2 className="text-2xl font-bold">INVOICE</h2>
+                      <p className="text-sm text-slate-600 mt-1">{selectedSale.sale_number}</p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      onClick={() => window.print()} 
+                      className="bg-blue-600 hover:bg-blue-700 print-hide"
+                    >
+                      <Printer className="h-4 w-4 mr-2" />
+                      Print
+                    </Button>
+                  </div>
+                  {/* Business Details */}
+                  <div className="grid grid-cols-2 gap-8 mb-6">
+                    <div>
+                      <h3 className="font-bold text-lg mb-2">From:</h3>
+                      <p className="font-bold text-base">{shop?.name}</p>
+                      {shop?.ird_registered && <p className="text-xs font-semibold mt-1">TAX INVOICE</p>}
+                      <p className="text-sm mt-1">{shop?.address}</p>
+                      <p className="text-sm">Phone: {shop?.phone}</p>
+                      {shop?.pan_number && <p className="text-sm">PAN: {shop?.pan_number}</p>}
+                      {shop?.vat_number && <p className="text-sm">VAT: {shop?.vat_number}</p>}
+                    </div>
+                    <div className="text-right">
+                      <h3 className="font-bold text-lg mb-2">Invoice Details:</h3>
+                      <div className="text-sm space-y-1">
+                        <p><span className="font-semibold">Date:</span> {new Date(selectedSale.created_at).toLocaleDateString('en-GB')}</p>
+                        <p><span className="font-semibold">Time:</span> {new Date(selectedSale.created_at).toLocaleTimeString('en-GB')}</p>
+                        {selectedSale.table_number && (
+                          <p><span className="font-semibold">Table:</span> #{selectedSale.table_number}</p>
+                        )}
+                        <p><span className="font-semibold">Payment:</span> <span className="uppercase">{selectedSale.payment_method}</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Items Table */}
+                  <div className="mb-6">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-slate-100 border-y-2 border-black">
+                          <th className="text-left py-2 px-3 font-bold">Item</th>
+                          <th className="text-center py-2 px-3 font-bold">Qty</th>
+                          <th className="text-right py-2 px-3 font-bold">Rate</th>
+                          <th className="text-right py-2 px-3 font-bold">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedSale.items.map((item, idx) => (
+                          <tr key={idx} className="border-b border-slate-300">
+                            <td className="py-2 px-3">{item.product_name}</td>
+                            <td className="text-center py-2 px-3">{item.quantity}</td>
+                            <td className="text-right py-2 px-3">Rs {item.unit_price.toFixed(2)}</td>
+                            <td className="text-right py-2 px-3 font-semibold">Rs {item.subtotal.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Totals */}
+                  <div className="flex justify-end mb-6">
+                    <div className="w-64 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotal:</span>
+                        <span className="font-semibold">Rs {selectedSale.subtotal.toFixed(2)}</span>
+                      </div>
+                      {selectedSale.discount_amount > 0 && (
+                        <div className="flex justify-between text-sm text-green-700">
+                          <span>Discount:</span>
+                          <span className="font-semibold">-Rs {selectedSale.discount_amount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-sm">
+                        <span>VAT (13%):</span>
+                        <span className="font-semibold">Rs {selectedSale.tax_amount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold border-t-2 border-black pt-2">
+                        <span>TOTAL:</span>
+                        <span>Rs {selectedSale.total_amount.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="text-center text-sm border-t border-slate-300 pt-4 space-y-1">
+                    <p className="font-semibold">Thank you for your business!</p>
+                    {shop?.ird_registered && (
+                      <p className="text-xs text-slate-600">This is a computer generated invoice</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </RoleGuard>
   );
