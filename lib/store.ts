@@ -199,8 +199,10 @@ export const useProductsStore = create<ProductsState>()(
         }
       },
       addProduct: (product) => {
+        // Remove image_url from persisted data to save space
+        const productToStore = { ...product, image_url: undefined };
         set((state) => ({
-          products: [...state.products, product],
+          products: [...state.products, productToStore],
         }));
         
         // Auto-create inventory for new product
@@ -219,10 +221,13 @@ export const useProductsStore = create<ProductsState>()(
           });
         }
       },
-      updateProduct: (product) =>
+      updateProduct: (product) => {
+        // Remove image_url from persisted data to save space
+        const productToStore = { ...product, image_url: undefined };
         set((state) => ({
-          products: state.products.map((p) => (p.id === product.id ? product : p)),
-        })),
+          products: state.products.map((p) => (p.id === product.id ? productToStore : p)),
+        }));
+      },
       deleteProduct: (productId) =>
         set((state) => ({
           products: state.products.filter((p) => p.id !== productId),
@@ -250,6 +255,9 @@ export const useProductsStore = create<ProductsState>()(
     }),
     {
       name: 'products-store',
+      partialize: (state) => ({
+        products: state.products.map(p => ({ ...p, image_url: undefined })),
+      }),
     }
   )
 );

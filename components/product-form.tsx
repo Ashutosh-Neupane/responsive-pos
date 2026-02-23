@@ -134,6 +134,7 @@ export function ProductForm({
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Product Image</CardTitle>
+              <p className="text-xs text-slate-500">Note: Images are not persisted in demo mode to save storage space</p>
             </CardHeader>
             <CardContent className="space-y-4">
               {imagePreview ? (
