@@ -44,33 +44,15 @@ export function PWAInstallButton() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
-    // For testing: show button after 2 seconds if no prompt
-    const timer = setTimeout(() => {
-      if (!deferredPrompt && !isInstalled && !dismissed) {
-        console.log("Showing install button (fallback)");
-        setShowInstallButton(true);
-      }
-    }, 2000);
-
     return () => {
-      clearTimeout(timer);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
-  }, [deferredPrompt]);
+  }, []);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      // Fallback: show manual instructions
-      alert(
-        "To install this app:\n\n" +
-        "On Chrome/Edge:\n" +
-        "1. Click the menu (⋮)\n" +
-        "2. Select 'Install app' or 'Add to Home Screen'\n\n" +
-        "On Safari (iOS):\n" +
-        "1. Tap the Share button\n" +
-        "2. Select 'Add to Home Screen'"
-      );
+      console.log("No install prompt available");
       return;
     }
 
