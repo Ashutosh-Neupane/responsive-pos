@@ -3,10 +3,13 @@
   "short_name": "Sudha POS",
   "description": "Modern Point of Sale system for Nepali businesses",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "fullscreen"],
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
-  "orientation": "portrait-primary",
+  "orientation": "any",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192x192.png",
@@ -27,5 +30,6 @@
       "url": "/dashboard/pos",
       "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "categories": ["business", "finance", "productivity"]
 }

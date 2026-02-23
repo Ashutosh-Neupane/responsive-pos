@@ -7,21 +7,50 @@ import { X, Download } from 'lucide-react';
 export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    // Check if already installed
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone ||
+      document.referrer.includes('android-app://');
+    
+    setIsStandalone(isInStandaloneMode);
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowPrompt(true);
+      
+      // Don't show if dismissed or already installed
+      if (!localStorage.getItem('pwa-prompt-dismissed') && !isInStandaloneMode) {
+        setShowPrompt(true);
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
+    // For testing on localhost, show prompt after 2 seconds if not dismissed
+    if (!isInStandaloneMode && !localStorage.getItem('pwa-prompt-dismissed')) {
+      const timer = setTimeout(() => {
+        if (!deferredPrompt) {
+          setShowPrompt(true);
+        }
+      }, 2000);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('beforeinstallprompt', handler);
+      };
+    }
+
     return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
+  }, [deferredPrompt]);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // Fallback for browsers that don't support beforeinstallprompt
+      alert('To install:\n\n1. Click browser menu (⋮)\n2. Select "Install app" or "Add to Home Screen"\n3. Follow the prompts');
+      return;
+    }
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
@@ -29,6 +58,7 @@ export function PWAInstallPrompt() {
     if (outcome === 'accepted') {
       setDeferredPrompt(null);
       setShowPrompt(false);
+      localStorage.setItem('pwa-installed', 'true');
     }
   };
 
@@ -37,7 +67,7 @@ export function PWAInstallPrompt() {
     localStorage.setItem('pwa-prompt-dismissed', 'true');
   };
 
-  if (!showPrompt || localStorage.getItem('pwa-prompt-dismissed')) {
+  if (!showPrompt || isStandalone) {
     return null;
   }
 
