@@ -69,31 +69,50 @@ export function PWAInstallButton() {
     localStorage.setItem("pwa-install-dismissed", "true");
   };
 
-  const isDashboardPage = pathname?.startsWith("/dashboard");
-
-  if (!showInstallButton || isDismissed || !isDashboardPage) return null;
+  if (!showInstallButton || isDismissed) return null;
 
   return (
-    <div className="fixed top-5 right-5 z-[1000] bg-white p-3 rounded-md shadow-lg border border-blue-600 max-w-[250px]">
-      <div className="flex justify-between items-start mb-2">
-        <p className="text-sm text-slate-900 flex-1">
-          Install Sudha POS App
-        </p>
+    <div className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 animate-in slide-in-from-bottom-5">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg shadow-2xl p-4">
         <button
           onClick={handleClose}
-          className="text-slate-500 hover:text-slate-700 ml-2"
+          className="absolute top-2 right-2 text-white/80 hover:text-white"
         >
-          <X size={14} />
+          <X className="h-4 w-4" />
         </button>
+        
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-2xl font-bold">SN</span>
+          </div>
+          
+          <div className="flex-1">
+            <h3 className="font-bold text-lg mb-1">Install Sudha POS</h3>
+            <p className="text-sm text-blue-50 mb-3">
+              Get app-like experience with offline access and faster performance
+            </p>
+            
+            <div className="flex gap-2">
+              <Button
+                onClick={handleInstallClick}
+                size="sm"
+                className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+              >
+                <Download className="h-4 w-4 mr-1" />
+                Install App
+              </Button>
+              <Button
+                onClick={handleClose}
+                size="sm"
+                variant="ghost"
+                className="text-white hover:bg-white/20"
+              >
+                Not Now
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
-      <Button
-        size="sm"
-        onClick={handleInstallClick}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-      >
-        <Download className="h-4 w-4 mr-1" />
-        Install App
-      </Button>
     </div>
   );
 }
