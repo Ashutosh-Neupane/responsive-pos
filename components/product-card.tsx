@@ -116,11 +116,11 @@ export function ProductCard({
             <span className="font-bold text-blue-600 text-sm">Rs {formatPrice(finalPrice)}</span>
           </div>
           
-          {(product.discount_percentage || product.discount_amount) && (
+          {(product.discount_percentage && product.discount_percentage > 0) || (product.discount_amount && product.discount_amount > 0) ? (
             <Badge className="text-[9px] sm:text-xs bg-green-100 text-green-700 px-1 sm:px-1.5 py-0 leading-tight h-3.5 sm:h-auto mt-0.5">
-              {product.discount_percentage ? `${product.discount_percentage}%` : `Rs ${formatPrice(product.discount_amount)}`}
+              {product.discount_percentage && product.discount_percentage > 0 ? `${product.discount_percentage}%` : `Rs ${formatPrice(product.discount_amount)}`}
             </Badge>
-          )}
+          ) : null}
         </div>
       </div>
 
